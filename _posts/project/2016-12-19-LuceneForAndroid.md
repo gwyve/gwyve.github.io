@@ -125,7 +125,7 @@ ant是java的一个编译工具，具体使用网络有相关教程。ivy为ant�
 
 在openjdk先编译成功并不意味着在Android上可以运行成功，仍然会报NoClassDefFoundError。
 
-###Android Studio
+### Android Studio
 在AS上面开发，已经习惯于在error提示的代码行上进行bug查找。而AS上显示的代码行号并非实际源码，针对AS的错误提示，如果是引入jar的问题，有的时候行号没有任何意义。
 
 ### 自己的思考
