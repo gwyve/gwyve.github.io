@@ -11,21 +11,19 @@ description: Lucene5.5.0在Android上面的适配
 博客：[https://gwyve.github.io/](https://gwyve.github.io/)    
 微博：[http://weibo.com/u/3225437531/](http://weibo.com/u/3225437531/)    
 
-# 项目路径
+## 项目路径
 [LuceneforAndroid](https://github.com/gwyve/LuceneForAndroid)
 
-# 背景介绍
-
+## 背景介绍
 Lucene是个开源的检索引擎（具体功能和实现我也不太懂）。这个项目的主要目的是在将[Lucene5.5.0](http://archive.apache.org/dist/lucene/java/5.5.0/)这个版本移植到Android平台使用。其中通过测试替换为本项目jar包后的[LuceneSearchDemo-Android](https://github.com/lukhnos/LuceneSearchDemo-Android)，来判定本项目是否成功。
 本项目主要参考[mobilelucene](https://github.com/lukhnos/mobilelucene/tree/master/lucene）。这里特别感谢[Lukhnos Liu](https://github.com/lukhnos)
 
-# 环境说明
-
+## 环境说明
 - Ubuntu 14.04 64bit
 - openjdk-1.8
 - ant-1.9.2
 
-# 具体步骤
+## 具体步骤
 
 ### 环境搭建
 
@@ -107,7 +105,7 @@ __说明：这里将下载下来的lucene5.5.0源码称为Lucene，将从Lukhnos
 ant -Dmobilejars=../build/out/ clean mobile-build-modules-without-test 
 ```
 
-在backward-codes下执行
+在backward-codes/下执行
 
 ```bush
 ant
@@ -117,18 +115,20 @@ ant
 
 - 编译该app可在android运行使用
 
-# 若干问题说明
-## ant和ivy
+## 若干问题说明
+
+### ant和ivy
 ant是java的一个编译工具，具体使用网络有相关教程。ivy为ant中处理相关依赖的一个工具，起初，试图使用LuceneK的ivy文件，但是，因为5.5.0跟5.3.0在依赖上发生改变（例如5.5.0sandbox依赖spatial3d，在5.3.0中依赖spatial），所以本项目继续使用5.5.0的ivy相关配置文件
 
-## jdk openjdk AndroidSdk
+### jdk openjdk AndroidSdk
 简单而言前两者者有交际同时又不同，Lucene的使用是在oracle开发的jdk下进行使用的，但是Lucene所涉及的相关包在Openjdk中并不存在，这就是本项目存在意义。
 
 在openjdk先编译成功并不意味着在Android上可以运行成功，仍然会报NoClassDefFoundError。
-## Android Studio
+
+###Android Studio
 在AS上面开发，已经习惯于在error提示的代码行上进行bug查找。而AS上显示的代码行号并非实际源码，针对AS的错误提示，如果是引入jar的问题，有的时候行号没有任何意义。
 
-## 自己的思考
+### 自己的思考
 [Oracle终于要向Java的非付费用户开枪了](https://news.cnblogs.com/n/559240)
 
 如果收费的话，那只能依赖openjdk，Lukhnos这个大神确实给了一个很好的解决方案。有很大的参考意义
