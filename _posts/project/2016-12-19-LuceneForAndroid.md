@@ -7,7 +7,7 @@ description: Lucene5.5.0在Android上面的适配
 
 
 声明：本博客欢迎转发，但请保留原作者信息!      
-作者：[VE] 
+作者：高伟毅    
 博客：[https://gwyve.github.io/](https://gwyve.github.io/)    
 微博：[http://weibo.com/u/3225437531/](http://weibo.com/u/3225437531/)    
 
@@ -16,7 +16,7 @@ description: Lucene5.5.0在Android上面的适配
 
 ## 背景介绍
 Lucene是个开源的检索引擎（具体功能和实现我也不太懂）。这个项目的主要目的是在将[Lucene5.5.0](http://archive.apache.org/dist/lucene/java/5.5.0/)这个版本移植到Android平台使用。其中通过测试替换为本项目jar包后的[LuceneSearchDemo-Android](https://github.com/lukhnos/LuceneSearchDemo-Android)，来判定本项目是否成功。
-本项目主要参考[mobilelucene](https://github.com/lukhnos/mobilelucene/tree/master/lucene）。这里特别感谢[Lukhnos Liu](https://github.com/lukhnos)
+本项目主要参考[mobilelucene](https://github.com/lukhnos/mobilelucene/tree/master/lucene)。这里特别感谢[Lukhnos Liu](https://github.com/lukhnos)
 
 ## 环境说明
 - Ubuntu 14.04 64bit
