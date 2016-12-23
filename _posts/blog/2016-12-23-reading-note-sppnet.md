@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 读书笔记SPPnet
+title: 读文笔记SPPnet
 category: blog
 description: 阅读Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition 笔记
 ---
@@ -25,19 +25,23 @@ description: 阅读Spatial Pyramid Pooling in Deep Convolutional Networks for Vi
 这个文章是R-CNN出来之后的改进文章，在fast C-NN和faster C-NN之前。本文主要是发现了R-CNN的主要问题：R-CNN的输入需要固定的尺寸，针对不同尺寸的图片R-CNN采取crop和warp这两种方法（见图1）。而之所以必须输入固定尺寸的原因是fc层需要固定输入。所以作者就是希望在fc层之前添加另外一种结构来使整个网络结构在fc层之前达到固定输入结构。图2上是RCNN的结构，下是
 SPPnet的结构。         
 ![crop-warp](/images/blog/2016-12-23/crop-warp.png)      
-<center>图1</center>      
+<center>图1</center>               
+<br/><br/>         
+     
 crop会导致无法输入整个目标，warp会导致图像失真     
 
 ## SPPnet
 根据R-CNN中的问题，作者提出了
 SPPnet的这一种结构，就是在conv之后使用空间金字塔池化层，具体实现是把cnn的最后一pooling层换成SPP。。整体结构如图2
 ![architecture](/images/blog/2016-12-23/architeture.png)     
-<center>图2</center>
+<center>图2</center>      
+<br/><br/>      
 
 ## SPP层
 作者提出的主要是这个空间金字塔层，他就是依次把一张图分成1份、4份、16份，然后在每一份中提取一个256维的向量（本文用的max的方法）。使用spp之前，只是在固定份数下提取数据，spp是在不同层次使用max pooling。具体如图3     
 ![SPP-Layer](/images/blog/2016-12-23/SPP-layer.png)    
-<center>图3</center>      
+<center>图3</center>     
+<br/><br/>           
 图片上分出来的每一份是使用一个滑动的窗口，如果需要输入的是a*a的，需要分成n*n份，那么步长就是a/n。
 
 ## 优势
@@ -55,9 +59,14 @@ SPPnet的这一种结构，就是在conv之后使用空间金字塔池化层，�
 ## 目标检索    
 R-CNN中，先在一种图片里面通过Selective Search选出n个推荐区域，每个区域跑一遍Conv层，这就要跑n遍conv层。在SPPnet中，只需要对一张图片跑一遍CNN，根据整张图片生成一个feature map，在这个feature map中使用Selective Search选出n个推荐区域，n个区域依次输入到SPP层和fc层。可以看出SPPnet对于一张图片只用跑一遍CNN。图4，图5说明了具体实验结果。    
 ![VOC2007-1](/images/blog/2016-12-23/VOC2007-1.png)         
-<center>图4</center>           
+<center>图4</center>     
+<br/><br/><br/>      
+      
+         
 ![VOC2007-2](/images/blog/2016-12-23/VOC2007-2.png)             
-<center>图5</center>        
+<center>图5</center>  
+<br/>               
+      
 图4是SPPnet、R-NN使用不同的模型的对比，SPPnet快了64倍，图5是使用同一模型时，SPPnet快了102倍。   
 
 
@@ -65,6 +74,7 @@ R-CNN中，先在一种图片里面通过Selective Search选出n个推荐区域�
 文章最后写了一下两个模型一起用的可以提高正确率。他这里还说了，这个联合提高正确率跟Conv无关。       
 ![combination](/images/blog/2016-12-23/combination.png)    
 <center>图6</center>
+<br/><br/><br/>        
 
 
 ## 个人想法
@@ -78,4 +88,4 @@ R-CNN中，先在一种图片里面通过Selective Search选出n个推荐区域�
 hierarchies for accurate object detection and semantic segmentation,”
 in CVPR, 2014.    
 [2]R. Girshick, "Fast R-CNN", ICCV, 2015      
-[3] Shaoqing Ren Kaiming He Ross Girshick Jian Sun. Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks.arXiv:1506.01497,2015               
+[3]Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun. "Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks." arXiv:1506.01497,2015               
