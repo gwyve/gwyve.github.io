@@ -24,7 +24,8 @@ description: 阅读Fast R-CNN笔记
 
 ## 问题引入
 
-整篇文章是在R-CNN和SPPnet基础之上的改进，自然就是在与R-CNN和SPPnet进行对比，通过发现R-CNN和SPPnet的缺点来提升，从而形成Fast R-CNN（简称FRCN）。
+整篇文章是在R-CNN和SPPnet基础之上的改进，自然就是在与R-CNN和SPPnet进行对比，通过发现R-CNN和SPPnet的缺点来提升，从而形成Fast R-CNN（简称FRCN）。    
+
 ### R-CNN  
 - 多阶段训练（Training is a multi-stage pipeline）：1、object proposal(SS) 2、object detector(SVM) 3、bounding-box regressor
 - 空间时间上花费大：SVM、bounding-box regressor的训练过程需要把特征写于硬盘。
@@ -36,6 +37,8 @@ description: 阅读Fast R-CNN笔记
 
 
 ## Fast R-CNN结构和训练过程
+
+具体过程如下步骤：         
 1. 整张图片输入Cnov层和pooling层生成conv feature map 
 2. 从Feature map推荐生成一定数量的RoI     
 3. 对每个RoI进入RoI pooling层，生成固定长度的向量。
