@@ -55,10 +55,10 @@ ZF模型，则通过该滑窗生成256维的向量。这个向量分别通过两
 
 ### 损失函数
 ![loss_fucntion](/images/blog/2017-1-5/loss_function1.png)     
-具体过程：     
-1. 给anchor标一个分数： 与真实的框框IoU最高的标为正数；与真实的框框IoU超过0.7的标为正数；与真实框框IoU小于0.3的标为负数。
-2. Pi<sup>*</sup>是anchor在步骤1中标的值。
-3. 这个t表示的是预测出的框框位置，t<sup>*</sup>表示Anchor的位置，具体如图                  
+具体过程：            
+1. 给anchor标一个分数： 与真实的框框IoU最高的标为正数；与真实的框框IoU超过0.7的标为正数；与真实框框IoU小于0.3的标为负数。             
+2. Pi<sup>*</sup>是anchor在步骤1中标的值。                      
+3. 这个t表示的是预测出的框框位置，t<sup>*</sup>表示Anchor的位置，具体如图                   
 ![loss_fucntion2](/images/blog/2017-1-5/loss_function2.png)      
 __到这里我才能明白Anchor是干啥用的，就是用来在真实框框跟预测框框之间的一个东西，仔细想想叫做“锚”这个词还是有道理的。__   
 
@@ -70,30 +70,42 @@ __到这里我才能明白Anchor是干啥用的，就是用来在真实框框跟
 3. 用Fast R-CNN初始化RPN，不改变Convolutional layers，只是微调RPN。                 
 4. 不改变Convolutional layers，微调Fast R-CNN。          
 
-## 实验、各种测评
+## 实验、各种测评       
+
 ### mAP
+
 ![experiment1](/images/blog/2017-1-5/experiment1.png)     
+
 这个是PASCAL VOC 2007的结果，在具体实现的时候，使用了RPN推荐的区域里面排名前300的区域（这样做是否有道理，后面会实验证明）。
 
 ablation experiments的第一个为了证明，RPN与fast R-CNN共享卷积层有用。第二个为了证明，使用推荐区域的前多少个合适。第三、四为了证明cls、reg两层有用。
 
 ### 时间
+
 ![experiment_time](/images/blog/2017-1-5/experiment2.png)
 
 可以看出，在conv层的耗时基本差不多，在选择推荐区域的时候RPN比SS更省时间，在“Region-wise”上Faster R-CNN更省时间（只输入推荐区域的一部分，数据少了，时间必然少了）。总之，整个目标发现系统使用的时间少了。
 
 ### Anchor && λ
-就是选择具体参数的问题           
-![experiment3](/images/blog/2017-1-5/experiment3.png)    
-### Analysis of Recall-to-IoU
+就是选择具体参数的问题
+           
+![experiment3](/images/blog/2017-1-5/experiment3.png)   
+ 
+### Analysis of Recall-to-IoU     
+
 这一部分也说明了RPN可以使用推荐的top-300这个方法。作者原话“ The plots show that the RPN method behaves gracefully when the number of proposals drops from 2000 to 300. This explains why the RPN has a good ultimate detection mAP when using as few as 300 proposals.”
+
 ### One-Stage Detection vs. Two-Stage Proposal + Detection
+
 ![one vs two](/images/blog/2017-1-5/experiment4.png)   
+
 这个主要证明了，RPN只是判定区域里面有没有对象，没有判断里面的对象的分类，这件事是有作用的。  
 
 ## 个人总结
+
 我觉得这个Faster R-CNN主要贡献就是RPN     
-### 提升准确率的      
+
+### 提升准确率的          
 - RPN和Fast R-CNN共享Conv layers    
 - Anchor的存在，尺度上不必有变化    
 
