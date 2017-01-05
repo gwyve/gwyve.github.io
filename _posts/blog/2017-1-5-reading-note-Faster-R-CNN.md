@@ -93,7 +93,7 @@ ablation experiments的第一个为了证明，RPN与fast R-CNN共享卷积层�
 
 ## 个人总结
 我觉得这个Faster R-CNN主要贡献就是RPN     
-### 提升准确率的
+### 提升准确率的      
 - RPN和Fast R-CNN共享Conv layers    
 - Anchor的存在，尺度上不必有变化    
 
