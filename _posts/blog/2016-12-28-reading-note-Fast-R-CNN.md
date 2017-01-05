@@ -42,7 +42,7 @@ description: 阅读Fast R-CNN笔记
 1. 整张图片输入Cnov层和pooling层生成conv feature map               
 2. 从Feature map推荐生成一定数量的RoI     
 3. 对每个RoI进入RoI pooling层，生成固定长度的向量。                  
-4. 第3步产生的输入全连接（fc）层，fc层分成两个sibling output layer：一个生成K+1个类的softmax，另一个生成bounding-position的位置。               
+4. 第3步产生的固定长度向量输入全连接（fc）层，fc层分成两个sibling output layer：一个生成K+1个类的softmax，另一个生成bounding-position的位置。               
 
 ![architecture](/images/blog/2016-12-28/architecture.png)
 
