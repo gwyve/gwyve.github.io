@@ -77,8 +77,10 @@ __这里这个通道值的变化我至今也没有看明白，源码没有深入
 
 ### 实验结果
 ![result](/images/blog/2017-2-15/result.png)            
+
 ### 错误分析           
 ![analysis](/images/blog/2017-2-15/analysis.png)         
+
 ### 非学术数据集实验    
 作者都说自己是实时的，那就不用学术的数据集。这次用了Picasso Dataset 和 People-Art Dataset；另外直接在野外应用YOLO。            
 ![result2](/images/blog/2017-2-15/result2.png)     
