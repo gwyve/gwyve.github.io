@@ -12,7 +12,7 @@ description: 阅读 You Only Look Once:Unified,Real-Time Object Detection 笔记
 微博：[http://weibo.com/u/3225437531/](http://weibo.com/u/3225437531/)    
   
 ## 引言    
-这是在Faster R-CNN之后的一篇object detection的文章，他的想法跟R-CNN区别还有有的，联系也有，不过不打。
+这是在Faster R-CNN之后的一篇object detection的文章，他的想法跟R-CNN区别还有有的，联系也有，不过不大。
 
 
 ## 发表位置  
