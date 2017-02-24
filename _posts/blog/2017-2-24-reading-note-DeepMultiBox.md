@@ -37,6 +37,8 @@ description: 阅读 Scalable Object Detection using Deep Neural Networks 笔记
 ![loss_match](/images/blog/2017-2-24/loss_match.png)                   
 ![loss_confidence](/images/blog/2017-2-24/loss_confidence.png)            
 ![loss](/images/blog/2017-2-24/loss.png)                        
+i-th是预测的box，j-th是真实的box，只有i-th预测对应了j-th个的时候x<sub>i,j</sub>才为1，其他的为0。l<sub>i</sub>是预测box的位置，g<sub></sub>是真实box的位置。c<sub>i</sub>是预测的box中有object（不知道是哪一类）的置信度。α是平衡两个损失的超参数。
+
 
 ### 训练细节                        
 - 这里先把ground truth boxes聚类，通过与具有代表性的聚类进行回归，以此来节省训练时间。
