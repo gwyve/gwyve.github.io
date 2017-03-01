@@ -25,7 +25,7 @@ description: 阅读 You Only Look Once:Unified,Real-Time Object Detection 笔记
 这篇文章都是在按照题目说的“你只用看一次”，作者主要发现了目前art-of-state的object detection的方法都是先找到一个推荐区域，然后对这个区域进行确定是不是有object同时分类，然后再fine-tune推荐的算法。作者发现这个object detection跟常人的自然认知不同，人在看到一副图片，看一下在就能够知道目标在哪里，目标是什么。所以，作者把推荐（定位）和分类（是否存在）两个步骤合并为一个步骤，从而把两个网络合并为一个网络。所以YOLO就是一个CNNs+fc就这么简单。  
 
 ## YOLO核心思想              
-整张图片作为输入，之间在输出层回归bounding box的位置和类别。     
+整张图片作为输入，之后在输出层回归bounding box的位置和类别。     
 
 ## YOLO优势   
 
