@@ -45,7 +45,9 @@ GPU: Tesla K20c
 [cuDNN_5.1](https://developer.nvidia.com/rdp/cudnn-download)                         
 [file](https://developer.nvidia.com/compute/machine-learning/cudnn/secure/v5.1/prod_20161129/8.0/cudnn-8.0-linux-x64-v5.1-tgz)
 
-### tensorflow 需要翻墙
+### tensorflow 
+
+需要翻墙
 
 [tensorflow_1.0.0](https://www.tensorflow.org/install/install_linux#installing_with_native_pip)                                
 [file_gpu_python2.7](https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.0.0-cp27-none-linux_x86_64.whl)
