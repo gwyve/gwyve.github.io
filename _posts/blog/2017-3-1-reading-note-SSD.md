@@ -54,9 +54,9 @@ description: 阅读 SSD:single shot multibox detector 笔记
 损失函数：这个与Faster R-CNN中的RPN是一样的，不过RPN是预测box里面有object或者没有，所以，没有分类，SSD直接用的softmax分类。location的损失，还是一样，都是用predict box和default box/Anchor的差 与 ground truth box和default box/Anchor的差 进行对比，求损失。                        
 ![loss](/images/blog/2017-3-1/loss.png)                      
 
-以下，是我根据我的理解画的一张简单示意图。这个default box存在求损失，就是尽可能把X与Y的数值做到一致。
+以下，是我根据我的理解画的一张简单示意图。这个default box存在求损失，就是尽可能把X与Y的数值做到差值最小。
 
-![loss1](images/blog/2017-3-1/loss1.png)
+![loss](/images/blog/2017-3-1/loss_.png)
 
 ### 为default box选择尺度（scale）和长宽比   
                          
