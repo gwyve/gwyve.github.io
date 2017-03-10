@@ -138,7 +138,7 @@ description: 阅读 SSD:single shot multibox detector 笔记
 ### 巨人肩膀
 
 - **DeepMultiBox:**这篇文章主要讲的多个scale的问题，利用图片放缩的方法进行不同scale多个框预测。文章在最后提到把定位分类放到one-shot的网络里面，我觉得作者可能受到这个的启发。                                                    
-- **YOLO:**YOLO这篇文章就是把定位和分类放在一个网络里面，同时彻底拜托了之前位置推荐的方式。SSD中的default box的生成借鉴了YOLO中cell的想法。SSD在很多方面都是在于YOLO做对比。毕竟YOLO是发表在CVPR2016上的成果。                                                          
+- **YOLO:**YOLO这篇文章就是把定位和分类放在一个网络里面，同时彻底摆脱了之前位置推荐的方式。SSD中的default box的生成借鉴了YOLO中cell的想法。SSD在很多方面都是在于YOLO做对比。毕竟YOLO是发表在CVPR2016上的成果。                                                          
 - **Faster R-CNN:**这篇文章主要借鉴了Faster R-CNN中anchor的想法。正如作者在提到“similar to Faster R-CNN”，SSD里面提到的“default bounding box”直接按照anchor理解的话，便容易理解多了，SSD与Faster R-CNN中关于Anchor的使用区别主要在Scalable上。                                                
 - **VGG16:**这个主要说的是个网络结构，SSD主要就是根据VGG16改的，VGG16中抛弃了之前用的5×5、7×7、11×11等大的卷积核，而是全用3×3的卷积核（VGG文章中提到了具体原因，大主要有1.更多个non-linear rectification layers.）。  
 
