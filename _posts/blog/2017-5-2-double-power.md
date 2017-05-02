@@ -59,6 +59,5 @@ CPU：6700K
 
 ## 附录
 
-[1] 
-XX青年教你怎么用双电源带动GTX570,花60元300W电源拖GTX570显卡   http://itbbs.pconline.com.cn/diy/14392370.html?nsukey=nn9k6dKZTfdurPMOSihAdPI4DYHB42hTn6MZwvEhRl8x34cwMTg0c9SdKHoaMMq7063KFT2akHMWZS5YDClXuwahMmZJTWXOKXSp8c%2B1j0aEZCBmW5DFpnzTuzRoPAkYPZV5TLqkE8F%2B%2Bvev%2BnE007Eze2VDd9UIyfZhgUvoqQ5y7KTFPGc8bD%2BeqNEc1hCR                     
-[2] 租显卡TB  https://item.taobao.com/item.htm?spm=a1z09.2.0.0.GyZ5V5&id=547034476533&_u=259gaih0075
+[1][XX青年教你怎么用双电源带动GTX570,花60元300W电源拖GTX570显卡](http://itbbs.pconline.com.cn/diy/14392370.html?nsukey=nn9k6dKZTfdurPMOSihAdPI4DYHB42hTn6MZwvEhRl8x34cwMTg0c9SdKHoaMMq7063KFT2akHMWZS5YDClXuwahMmZJTWXOKXSp8c%2B1j0aEZCBmW5DFpnzTuzRoPAkYPZV5TLqkE8F%2B%2Bvev%2BnE007Eze2VDd9UIyfZhgUvoqQ5y7KTFPGc8bD%2BeqNEc1hCR)                     
+[2] [TB租显卡](https://item.taobao.com/item.htm?spm=a1z09.2.0.0.GyZ5V5&id=547034476533&_u=259gaih0075)
