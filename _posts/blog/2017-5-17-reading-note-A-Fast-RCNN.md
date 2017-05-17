@@ -101,7 +101,7 @@ description: 阅读 A-Fast-RCNN:Hard Positive Generation via Adversary for Objec
 ## 个人想法
 
 在读这篇文章之前，有两篇文章最好了解一下：                  
-1. Action recofnition using visual attention<sup>[2]</sup>
+1. Action recognition using visual attention<sup>[2]</sup>
 2. Spatial transformer networks<sup>[1]</sup>
 
 这篇文章很大程度上，是把这两篇文章的目的反过来，然后使用GAN的思路来解决这个问题，这个思路很妙～
