@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>读文笔记FPN | gwyve</title>
+    <meta name="author" content="Gwyve" />
+    <meta name="renderer" content="webkit">
+    <meta name="description" content="VE's Blog" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta property="wb:webmaster" content="ddb1e697310369c4" />
+    <link rel="stylesheet" href="/css/default.css" type="text/css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="alternate" type="application/atom+xml" title="Recent Entries" href="/atom.xml" />
+    <script src="/js/jquery-1.7.1.min.js" type="text/javascript"></script>
+</head>
+<body>
+
+    <div class="home-menu">
+        <div class="home-icon-con">
+            <a class="home-menu-icon" href="/">gwyve</a>
+            <a class="home-follow" href="#" title="Contact Me">+</a>
+        </div>
+        <div class="home-contact">
+            <a href="http://weibo.com/3225437531/" target="_blank" style="margin-left:-5px;"><img src="http://www.weibo.com/favicon.ico" alt="" width="25"/></a>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="/js/prettify/prettify.css" />
+<style type="text/css">
+    body { background:#e8e8e8; }
+    @media screen and (max-width: 750px){
+        body { background:#fff; }
+    }
+    @media screen and (max-width: 1020px){
+        body { background:#fff; }
+    }
+</style>
+
+<div id="content">
+    <div class="entry">
+        <h1 class="entry-title"><a href="/blog/2017/04/11/reading-note-FPN.html" title="读文笔记FPN">读文笔记FPN</a></h1>
+        <p class="entry-date">2017-04-11</p>
+        <p>声明：本博客欢迎转发，但请保留原作者信息!    <br />
+作者：高伟毅  <br />
+博客：<a href="https://gwyve.github.io/">https://gwyve.github.io/</a>  <br />
+微博：<a href="http://weibo.com/u/3225437531/">http://weibo.com/u/3225437531/</a></p>
+
+<h2 id="引言">引言</h2>
+
+<p>这个还是rbg这个R-CNN开山鼻祖弄得东西，只不过是他从MicroSoft跳到Facebook之后发的东西，同时，还看到了ResNet的Kaiming.He。文章是一个朋友推荐的，内容读起来并不费劲。</p>
+
+<h2 id="发表位置">发表位置</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/1612.03144">PDF arXiv：1612.03144</a></li>
+</ul>
+
+<h2 id="问题引入">问题引入</h2>
+
+<p>通过多个尺度上预测效果会好，可是，如果这些多个尺度的特征都相互没有关联的预测就会失去利用较高特征图的机会。所以，需要让这些不同尺度的特征之间，相互发生一定联系。不同尺度可以看做是一个金字塔，产生联系，就是在不同层之间产生联系。</p>
+
+<p><img src="/images/blog/2017-4-11/pyramid.png" alt="pyramid.png" /></p>
+
+<h2 id="fpn核心思想">FPN核心思想</h2>
+
+<p>这个FPN有两个思想，但是，并不是一脉相承的关系，而是对比的关系。虽然两个都是FPN的思想，但是作者明确指出他的FPN就是Top-down and lateral connections。</p>
+
+<h3 id="bottom-up-pathway">Bottom-up pathway</h3>
+
+<p>这个就是上图c的想法。这个实现起来比较简单。作者对这个想法的意义并没有做过多的解释，因为这个实现其实就是在主网络外再加上一个predict相关金字塔网络。</p>
+
+<h3 id="top-down-and-lateral-connections">Top-down and lateral connections</h3>
+
+<p>作者在这里指出高层的特征具有更强的语义（semantical）含义，虽然越高层就越粗糙。所以，从横向过来的底层的特征与高层的结合进行预测输入。</p>
+
+<p>作者在这里并没有说明upsample的具体方法（作者说这个方法不是这个文章的重点，并指出有很多方法可以用）。但是，作者提到了，底层特征与高层特征结合之后需要对其进行一个卷积，目的是为了郊区upsample的混淆（aliasing）影响。</p>
+
+<p><img src="/images/blog/2017-4-11/Top_down.png" alt="Top_down.png" /></p>
+
+<h2 id="实验">实验</h2>
+
+<p>作者分别对RPN、Faster R-CNN 和Fast R-CNN做实验</p>
+
+<p>这里RPN主要是针对不同金字塔层的特征进行不知类的预测位置；而Faster/Fast R-CNN都是根据已经知道框的位置，微调上预测。</p>
+
+<p>800像素图片输入，8张GPU训练8个小时</p>
+
+<p>数据集COCO</p>
+
+<h2 id="分析">分析</h2>
+
+<p><img src="/images/blog/2017-4-11/RPN.png" alt="RPN.png" /></p>
+
+<h3 id="top-down有用">top-down有用</h3>
+
+<p>上图c和d的对比，说明top-down有用。d的bottom-up中large object好，作者推测是因为bottom-up的不同层之间的语义鸿沟大。</p>
+
+<h3 id="latera-connections-有用">latera connections 有用</h3>
+
+<p>上图c和e说明了此</p>
+
+<h3 id="金字塔每层都预测有用">金字塔每层都预测有用</h3>
+
+<p>f是下图的上面的一个</p>
+
+<p><img src="/images/blog/2017-4-11/topPredict.png" alt="topPredict.png" /></p>
+
+<h3 id="fasterfast-r-cnn的结果">Faster/Fast R-CNN的结果</h3>
+
+<p><img src="/images/blog/2017-4-11/2result.png" alt="2result.png" /></p>
+
+<h3 id="针对其他牛的方法使用fpn的效果">针对其他牛的方法使用FPN的效果</h3>
+
+<p><img src="/images/blog/2017-4-11/3result.png" alt="3result.png" /></p>
+
+<h3 id="在resnet共享特征">在ResNet共享特征</h3>
+
+<p><img src="/images/blog/2017-4-11/shareFeature.png" alt="shareFeature.png" /></p>
+
+<h3 id="运行时间">运行时间</h3>
+
+<ul>
+  <li>NVIDIA M40 GPU</li>
+  <li>FPN-based Faster R-CNN Resnet-50   per image  0.20s</li>
+  <li>FPN-based Faster R-CNN Resnet-101  per image  0.24s</li>
+  <li>single-scale ResNet-50             per image  0.32s</li>
+</ul>
+
+<h2 id="个人想法">个人想法</h2>
+
+<p>这个FPN跟之前看的那个hyperNet有些类似的地方，hyperNet是特征提取过程进行多层之间关联，这个是在预测的时候进行关联。</p>
+
+<p>现在大有不在VOC上玩的趋势，都开始看coco，coco很大，跑起来对硬件要求太高了。作者8张GPU，那简直就不是一般人能玩的来的，趁着这个民用级别的还能玩，赶紧弄，这是个关键。</p>
+
+<p>他既然可以在predict的时候有关联，就是类似这个金字塔的网络，我就要在这个上面搞一下。</p>
+
+
+
+        <div id="disqus_container">
+            <div style="margin-bottom:20px" class="right">
+                <script type="text/javascript" charset="utf-8">
+                (function(){
+                  var _w = 86 , _h = 16;
+                  var param = {
+                    url:location.href,
+                    type:'6',
+                    count:'', /**是否显示分享数，1显示(可选)*/
+                    appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+                    title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+                    pic:'', /**分享图片的路径(可选)*/
+                    ralateUid:'3225437531', /**关联用户的UID，分享微博会@该用户(可选)*/
+                    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+                    rnd:new Date().valueOf()
+                  }
+                  var temp = [];
+                  for( var p in param ){
+                    temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+                  }
+                  document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="https://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+                })()
+                </script>
+            </div>
+<!--
+            <a href="#" class="comment" onclick="return false;">点击查看评论</a>
+-->
+            <div id="disqus_thread"></div>
+        </div>
+    </div>
+
+    <div class="sidenav">
+        <iframe width="100%" height="75" class="share_self"  frameborder="0" scrolling="no" src="https://widget.weibo.com/weiboshow/index.php?language=&width=0&height=75&fansRow=2&ptype=1&speed=0&skin=5&isTitle=0&noborder=0&isWeibo=0&isFans=0&uid=3225437531&verifier=87199cd9&dpc=1"></iframe>
+    </div>
+
+
+
+    <div class="sidenav">
+        <h2>Blog</h2>
+        <ul class="artical-list">
+        
+            <li><a href="/blog/2017/07/16/reading-note-the-truth-about-self-driving-cars.html">读文笔记 The Truth About "self-driving" Cars</a></li>
+        
+            <li><a href="/blog/2017/05/17/reading-note-A-Fast-RCNN.html">读文笔记A-Fast-RCNN</a></li>
+        
+            <li><a href="/blog/2017/05/02/double-power.html">双电源供电</a></li>
+        
+            <li><a href="/blog/2017/04/11/reading-note-FPN.html">读文笔记FPN</a></li>
+        
+            <li><a href="/blog/2017/04/10/reading-note-Speed-Accuracy.html">读文笔记Speed/Accuracy trade-offs</a></li>
+        
+            <li><a href="/blog/2017/03/29/reading-note-R-FCN.html">读文笔记R-FCN</a></li>
+        
+            <li><a href="/blog/2017/03/27/caffe-add-layer.html">caffe添加新layer</a></li>
+        
+            <li><a href="/blog/2017/03/20/reading-note-ResNet.html">读文笔记ResNet</a></li>
+        
+            <li><a href="/blog/2017/03/01/reading-note-SSD.html">读文笔记SSD</a></li>
+        
+            <li><a href="/blog/2017/02/24/reading-note-DeepMultiBox.html">读文笔记DeepMultiBox</a></li>
+        
+            <li><a href="/blog/2017/02/15/reading-note-YOLO.html">读文笔记YOLO</a></li>
+        
+            <li><a href="/blog/2017/01/05/reading-note-Faster-R-CNN.html">读文笔记Faster R-CNN</a></li>
+        
+            <li><a href="/blog/2016/12/28/reading-note-Fast-R-CNN.html">读文笔记Fast R-CNN</a></li>
+        
+            <li><a href="/blog/2016/12/23/reading-note-sppnet.html">读文笔记SPPnet</a></li>
+        
+            <li><a href="/blog/2016/12/11/who-i-am.html">我是谁</a></li>
+        
+        </ul>
+<!--
+        <h2>Opinion</h2>
+        <ul class="artical-list">
+        
+        </ul>
+-->
+        <h2>Project</h2>
+        <ul class="artical-list">
+        
+            <li><a href="/project/2017/03/25/ServerOnAndroid.html">ServerOnAndroid</a></li>
+        
+            <li><a href="/project/2017/03/05/cuda-tensorflow-install.html">cuda && tensorflow 安装</a></li>
+        
+            <li><a href="/project/2016/12/19/LuceneForAndroid.html">LuceneForAndroid</a></li>
+        
+        </ul>
+    </div>
+</div>
+
+<script src="/js/post.js" type="text/javascript"></script>
+
+
+    <script type="text/javascript">
+        $(function(){
+            $('.home-follow').click(function(e){
+                e.preventDefault();
+
+                if($('.home-contact').is(':visible')){
+                    $('.home-contact').slideUp(100);
+                }else{
+                    $('.home-contact').slideDown(100);
+                }
+            });
+        })
+    </script>
+</body>
+</html>

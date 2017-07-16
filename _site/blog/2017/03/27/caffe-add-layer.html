@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>caffe添加新layer | gwyve</title>
+    <meta name="author" content="Gwyve" />
+    <meta name="renderer" content="webkit">
+    <meta name="description" content="VE's Blog" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta property="wb:webmaster" content="ddb1e697310369c4" />
+    <link rel="stylesheet" href="/css/default.css" type="text/css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="alternate" type="application/atom+xml" title="Recent Entries" href="/atom.xml" />
+    <script src="/js/jquery-1.7.1.min.js" type="text/javascript"></script>
+</head>
+<body>
+
+    <div class="home-menu">
+        <div class="home-icon-con">
+            <a class="home-menu-icon" href="/">gwyve</a>
+            <a class="home-follow" href="#" title="Contact Me">+</a>
+        </div>
+        <div class="home-contact">
+            <a href="http://weibo.com/3225437531/" target="_blank" style="margin-left:-5px;"><img src="http://www.weibo.com/favicon.ico" alt="" width="25"/></a>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="/js/prettify/prettify.css" />
+<style type="text/css">
+    body { background:#e8e8e8; }
+    @media screen and (max-width: 750px){
+        body { background:#fff; }
+    }
+    @media screen and (max-width: 1020px){
+        body { background:#fff; }
+    }
+</style>
+
+<div id="content">
+    <div class="entry">
+        <h1 class="entry-title"><a href="/blog/2017/03/27/caffe-add-layer.html" title="caffe添加新layer">caffe添加新layer</a></h1>
+        <p class="entry-date">2017-03-27</p>
+        <p>声明：本博客欢迎转发，但请保留原作者信息!    <br />
+作者：高伟毅  <br />
+博客：<a href="https://gwyve.github.io/">https://gwyve.github.io/</a>  <br />
+微博：<a href="http://weibo.com/u/3225437531/">http://weibo.com/u/3225437531/</a></p>
+
+<h2 id="引言">引言</h2>
+
+<p>使用caffe有一段时间了，可是，目前使用的都是caffe自带的layer，随着自己对各种模型的熟悉，添加或修改现有layer的需求越来越大。</p>
+
+<h2 id="难度分析">难度分析</h2>
+
+<p>我认为对caffe的layer的修改，按照难度，可以分成以下几个阶段：</p>
+<ol>
+  <li>只修改layer在cpu里的计算过程，同时不修改parameter，相当于单纯新添加一个layer</li>
+  <li>修改layer在cpu计算过程，同时修改parameter</li>
+  <li>修改layer在cudnn的计算过程</li>
+  <li>修改layer在cuda的计算过程</li>
+</ol>
+
+<h2 id="难度1">难度1</h2>
+
+<p>说明：</p>
+<ol>
+  <li>这里使用最简单的mnist的例子，首先，保证caffe能够运行mnist的训练模型，即，运行./$CAFFE_ROOT/examples/mnist/train_lenet.sh能够出现下图的内容。</li>
+  <li>这里添加的layer命名为VeLayer，主要是根据Conv换个名字</li>
+</ol>
+
+<p><img src="/images/blog/2017-3-27/first.png" alt="first" /></p>
+
+<h3 id="1复制conv_layercpp命名为ve_layercpp-以及-conv_layerhpp---ve_layerhpp">1.复制conv_layer.cpp命名为ve_layer.cpp 以及 conv_layer.hpp -&gt; ve_layer.hpp</h3>
+
+<pre><code class="language-bush">$ cp src/caffe/layers/conv_layer.cpp src/caffe/layers/ve_layer.cpp
+$ cp include/caffe/layers/conv_layer.hpp include/caffe/layers/ve_layer.hpp
+</code></pre>
+
+<h3 id="2修改ve_layerhpp内容">2.修改ve_layer.hpp内容</h3>
+
+<p>开头的位置：#ifndef CAFFE_CONV_LAYER_HPP_ -&gt;  #ifndef CAFFE_VE_LAYER_HPP_                      #define CAFFE_CONV_LAYER_HPP_ -&gt; #define CAFFE_VE_LAYER_HPP_</p>
+
+<p>类声明、构造函数声明：ConvolutionLayer -&gt; VeLayer</p>
+
+<p>type（）返回：”Convolution” -&gt; “Ve” 这个值改不改的意义不大，都可以运行</p>
+
+<h3 id="3修改ve_layercpp内容">3.修改ve_layer.cpp内容</h3>
+
+<p>include : “caffe/layers/conv_layer.hpp” -&gt; “caffe/layers/ve_layer.hpp”</p>
+
+<p>函数属于类： ConvolutionLayer -&gt; VeLayer</p>
+
+<p>STUP_GPU: ConvolutionLayer -&gt; VeLayer</p>
+
+<p>INSTANTIATE: ConvolutionLayer -&gt; VeLayer</p>
+
+<h3 id="4在srccaffelayer_factorycpp修改">4.在src/caffe/layer_factory.cpp修改</h3>
+
+<p>添加 #include “caffe/layers/ve_layer.hpp”</p>
+
+<p>在namespace caffe 下添加:</p>
+
+<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="c1">// Get Ve layer according to engine.
+</span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Dtype</span><span class="o">&gt;</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Layer</span><span class="o">&lt;</span><span class="n">Dtype</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">GetVeLayer</span><span class="p">(</span>
+    <span class="k">const</span> <span class="n">LayerParameter</span><span class="o">&amp;</span> <span class="n">param</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">ConvolutionParameter</span> <span class="n">conv_param</span> <span class="o">=</span> <span class="n">param</span><span class="p">.</span><span class="n">convolution_param</span><span class="p">();</span>
+  <span class="n">ConvolutionParameter_Engine</span> <span class="n">engine</span> <span class="o">=</span> <span class="n">conv_param</span><span class="p">.</span><span class="n">engine</span><span class="p">();</span>
+<span class="cp">#ifdef USE_CUDNN
+</span>  <span class="kt">bool</span> <span class="n">use_dilation</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">conv_param</span><span class="p">.</span><span class="n">dilation_size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">conv_param</span><span class="p">.</span><span class="n">dilation</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">use_dilation</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="cp">#endif
+</span>  <span class="k">if</span> <span class="p">(</span><span class="n">engine</span> <span class="o">==</span> <span class="n">ConvolutionParameter_Engine_DEFAULT</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">ConvolutionParameter_Engine_CAFFE</span><span class="p">;</span>
+<span class="cp">#ifdef USE_CUDNN
+</span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">use_dilation</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">engine</span> <span class="o">=</span> <span class="n">ConvolutionParameter_Engine_CUDNN</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="cp">#endif
+</span>  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">engine</span> <span class="o">==</span> <span class="n">ConvolutionParameter_Engine_CAFFE</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Layer</span><span class="o">&lt;</span><span class="n">Dtype</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">VeLayer</span><span class="o">&lt;</span><span class="n">Dtype</span><span class="o">&gt;</span><span class="p">(</span><span class="n">param</span><span class="p">));</span>
+<span class="cp">#ifdef USE_CUDNN
+</span>  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">engine</span> <span class="o">==</span> <span class="n">ConvolutionParameter_Engine_CUDNN</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">use_dilation</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">LOG</span><span class="p">(</span><span class="n">FATAL</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"CuDNN doesn't support the dilated VE at Layer "</span>
+                 <span class="o">&lt;&lt;</span> <span class="n">param</span><span class="p">.</span><span class="n">name</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Layer</span><span class="o">&lt;</span><span class="n">Dtype</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">CuDNNConvolutionLayer</span><span class="o">&lt;</span><span class="n">Dtype</span><span class="o">&gt;</span><span class="p">(</span><span class="n">param</span><span class="p">));</span>
+<span class="cp">#endif
+</span>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">LOG</span><span class="p">(</span><span class="n">FATAL</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"Layer "</span> <span class="o">&lt;&lt;</span> <span class="n">param</span><span class="p">.</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"  VEVEVEVE has unknown engine."</span><span class="p">;</span>
+    <span class="k">throw</span><span class="p">;</span>  <span class="c1">// Avoids missing return warning
+</span>  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">REGISTER_LAYER_CREATOR</span><span class="p">(</span><span class="n">Ve</span><span class="p">,</span> <span class="n">GetVeLayer</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p>return shared_ptr&lt;Layer<Dtype> &gt;(new VeLayer<Dtype>(param));</Dtype></Dtype></p>
+
+<p>这里REGISTER_LAYER_CREATOR里面的第一个参数是prototxt里面type的参数</p>
+
+<h3 id="5-编译">5. 编译</h3>
+
+<p>make</p>
+
+<h3 id="6-修改examplesmnistlenet_train_testprototxt">6. 修改examples/mnist/lenet_train_test.prototxt</h3>
+
+<p>把第二个conv层，改成Ve</p>
+
+<p>type: “Convolution” -&gt; “Ve”  这个“VE”是跟第4步的REGISTER_LAYER_CREATOR相呼应的。</p>
+
+<h3 id="7-运行">7. 运行</h3>
+
+<p>./$CAFFE_ROOT/examples/mnist/train_lenet.sh 结果如图</p>
+
+<p><img src="/images/blog/2017-3-27/second.png" alt="second" /></p>
+
+<h2 id="难度2">难度2</h2>
+
+<p>这里依照难度1说的VeLayer，添加新的parameter</p>
+
+<h3 id="1-make-clean">1. make clean</h3>
+
+<p>清除难度1编译成功的文件</p>
+
+<h3 id="2-修改proto文件">2. 修改proto文件</h3>
+
+<ol>
+  <li>在src/caffe/proto/caffe.proto的message V1LayerParameter {的enum LayerType {添加</li>
+</ol>
+
+<p>VE = 40;  //这个具体的ID根据实际更改的,并有觉得这一步有什么用，具体什么用，后面再看</p>
+
+<ol>
+  <li>在src/caffe/proto/caffe.proto的message LayerParameter { 添加</li>
+</ol>
+
+<p>optional VeParameter ve_param = 147;</p>
+
+<ol>
+  <li>在src/caffe/proto/caffe.proto添加</li>
+</ol>
+
+<div class="language-proto highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">message</span> <span class="nc">VeParameter</span> <span class="p">{</span>
+  <span class="k">optional</span> <span class="kt">uint32</span> <span class="na">num_output</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// The number of outputs for the layer
+</span>  <span class="k">optional</span> <span class="kt">bool</span> <span class="na">bias_term</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">[</span><span class="k">default</span> <span class="o">=</span> <span class="kc">true</span><span class="p">];</span> <span class="c1">// whether to have bias terms
+</span>
+  <span class="c1">// Pad, kernel size, and stride are all given as a single value for equal
+</span>  <span class="c1">// dimensions in all spatial dimensions, or once per spatial dimension.
+</span>  <span class="k">repeated</span> <span class="kt">uint32</span> <span class="na">pad</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="c1">// The padding size; defaults to 0
+</span>  <span class="k">repeated</span> <span class="kt">uint32</span> <span class="na">kernel_size</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span> <span class="c1">// The kernel size
+</span>  <span class="k">repeated</span> <span class="kt">uint32</span> <span class="na">stride</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span> <span class="c1">// The stride; defaults to 1
+</span>  <span class="c1">// Factor used to dilate the kernel, (implicitly) zero-filling the resulting
+</span>  <span class="c1">// holes. (Kernel dilation is sometimes referred to by its use in the
+</span>  <span class="c1">// algorithme à trous from Holschneider et al. 1987.)
+</span>  <span class="k">repeated</span> <span class="kt">uint32</span> <span class="na">dilation</span> <span class="o">=</span> <span class="mi">18</span><span class="p">;</span> <span class="c1">// The dilation; defaults to 1
+</span>
+  <span class="c1">// For 2D convolution only, the *_h and *_w versions may also be used to
+</span>  <span class="c1">// specify both spatial dimensions.
+</span>  <span class="k">optional</span> <span class="kt">uint32</span> <span class="na">pad_h</span> <span class="o">=</span> <span class="mi">9</span> <span class="p">[</span><span class="k">default</span> <span class="o">=</span> <span class="mi">0</span><span class="p">];</span> <span class="c1">// The padding height (2D only)
+</span>  <span class="k">optional</span> <span class="kt">uint32</span> <span class="na">pad_w</span> <span class="o">=</span> <span class="mi">10</span> <span class="p">[</span><span class="k">default</span> <span class="o">=</span> <span class="mi">0</span><span class="p">];</span> <span class="c1">// The padding width (2D only)
+</span>  <span class="k">optional</span> <span class="kt">uint32</span> <span class="na">kernel_h</span> <span class="o">=</span> <span class="mi">11</span><span class="p">;</span> <span class="c1">// The kernel height (2D only)
+</span>  <span class="k">optional</span> <span class="kt">uint32</span> <span class="na">kernel_w</span> <span class="o">=</span> <span class="mi">12</span><span class="p">;</span> <span class="c1">// The kernel width (2D only)
+</span>  <span class="k">optional</span> <span class="kt">uint32</span> <span class="na">stride_h</span> <span class="o">=</span> <span class="mi">13</span><span class="p">;</span> <span class="c1">// The stride height (2D only)
+</span>  <span class="k">optional</span> <span class="kt">uint32</span> <span class="na">stride_w</span> <span class="o">=</span> <span class="mi">14</span><span class="p">;</span> <span class="c1">// The stride width (2D only)
+</span>
+  <span class="k">optional</span> <span class="kt">uint32</span> <span class="kd">group</span> <span class="o">=</span> <span class="mi">5</span> <span class="p">[</span><span class="k">default</span> <span class="o">=</span> <span class="mi">1</span><span class="p">];</span> <span class="c1">// The group size for group conv
+</span>
+  <span class="k">optional</span> <span class="n">FillerParameter</span> <span class="na">weight_filler</span> <span class="o">=</span> <span class="mi">7</span><span class="p">;</span> <span class="c1">// The filler for the weight
+</span>  <span class="k">optional</span> <span class="n">FillerParameter</span> <span class="na">bias_filler</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span> <span class="c1">// The filler for the bias
+</span>  <span class="kd">enum</span> <span class="n">Engine</span> <span class="p">{</span>
+    <span class="na">DEFAULT</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="na">CAFFE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="na">CUDNN</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">optional</span> <span class="n">Engine</span> <span class="na">engine</span> <span class="o">=</span> <span class="mi">15</span> <span class="p">[</span><span class="k">default</span> <span class="o">=</span> <span class="n">DEFAULT</span><span class="p">];</span>
+
+  <span class="c1">// The axis to interpret as "channels" when performing convolution.
+</span>  <span class="c1">// Preceding dimensions are treated as independent inputs;
+</span>  <span class="c1">// succeeding dimensions are treated as "spatial".
+</span>  <span class="c1">// With (N, C, H, W) inputs, and axis == 1 (the default), we perform
+</span>  <span class="c1">// N independent 2D convolutions, sliding C-channel (or (C/g)-channels, for
+</span>  <span class="c1">// groups g&gt;1) filters across the spatial axes (H, W) of the input.
+</span>  <span class="c1">// With (N, C, D, H, W) inputs, and axis == 1, we perform
+</span>  <span class="c1">// N independent 3D convolutions, sliding (C/g)-channels
+</span>  <span class="c1">// filters across the spatial axes (D, H, W) of the input.
+</span>  <span class="k">optional</span> <span class="kt">int32</span> <span class="na">axis</span> <span class="o">=</span> <span class="mi">16</span> <span class="p">[</span><span class="k">default</span> <span class="o">=</span> <span class="mi">1</span><span class="p">];</span>
+
+  <span class="c1">// Whether to force use of the general ND convolution, even if a specific
+</span>  <span class="c1">// implementation for blobs of the appropriate number of spatial dimensions
+</span>  <span class="c1">// is available. (Currently, there is only a 2D-specific convolution
+</span>  <span class="c1">// implementation; for input blobs with num_axes != 2, this option is
+</span>  <span class="c1">// ignored and the ND implementation will be used.)
+</span>  <span class="k">optional</span> <span class="kt">bool</span> <span class="na">force_nd_im2col</span> <span class="o">=</span> <span class="mi">17</span> <span class="p">[</span><span class="k">default</span> <span class="o">=</span> <span class="kc">false</span><span class="p">];</span>
+<span class="p">}</span>
+
+</code></pre>
+</div>
+
+<h3 id="3-修改layer_factorycpp">3. 修改layer_factory.cpp</h3>
+
+<p>将难度1添加的内容改成</p>
+
+<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="c1">// Get Ve layer according to engine.
+</span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Dtype</span><span class="o">&gt;</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Layer</span><span class="o">&lt;</span><span class="n">Dtype</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">GetVeLayer</span><span class="p">(</span>
+    <span class="k">const</span> <span class="n">LayerParameter</span><span class="o">&amp;</span> <span class="n">param</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">VeParameter</span> <span class="n">ve_param</span> <span class="o">=</span> <span class="n">param</span><span class="p">.</span><span class="n">ve_param</span><span class="p">();</span>
+  <span class="n">VeParameter_Engine</span> <span class="n">engine</span> <span class="o">=</span> <span class="n">ve_param</span><span class="p">.</span><span class="n">engine</span><span class="p">();</span>
+<span class="cp">#ifdef USE_CUDNN
+</span>  <span class="kt">bool</span> <span class="n">use_dilation</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ve_param</span><span class="p">.</span><span class="n">dilation_size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ve_param</span><span class="p">.</span><span class="n">dilation</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">use_dilation</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="cp">#endif
+</span>  <span class="k">if</span> <span class="p">(</span><span class="n">engine</span> <span class="o">==</span> <span class="n">VeParameter_Engine_DEFAULT</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">VeParameter_Engine_CAFFE</span><span class="p">;</span>
+<span class="cp">#ifdef USE_CUDNN
+</span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">use_dilation</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">engine</span> <span class="o">=</span> <span class="n">ConvolutionParameter_Engine_CUDNN</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="cp">#endif
+</span>  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">engine</span> <span class="o">==</span> <span class="n">ConvolutionParameter_Engine_CAFFE</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Layer</span><span class="o">&lt;</span><span class="n">Dtype</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">VeLayer</span><span class="o">&lt;</span><span class="n">Dtype</span><span class="o">&gt;</span><span class="p">(</span><span class="n">param</span><span class="p">));</span>
+<span class="cp">#ifdef USE_CUDNN
+</span>  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">engine</span> <span class="o">==</span> <span class="n">ConvolutionParameter_Engine_CUDNN</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">use_dilation</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">LOG</span><span class="p">(</span><span class="n">FATAL</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"CuDNN doesn't support the dilated VE at Layer "</span>
+                 <span class="o">&lt;&lt;</span> <span class="n">param</span><span class="p">.</span><span class="n">name</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Layer</span><span class="o">&lt;</span><span class="n">Dtype</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">CuDNNConvolutionLayer</span><span class="o">&lt;</span><span class="n">Dtype</span><span class="o">&gt;</span><span class="p">(</span><span class="n">param</span><span class="p">));</span>
+<span class="cp">#endif
+</span>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">LOG</span><span class="p">(</span><span class="n">FATAL</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"Layer "</span> <span class="o">&lt;&lt;</span> <span class="n">param</span><span class="p">.</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"  VEVEVEVE has unknown engine."</span><span class="p">;</span>
+    <span class="k">throw</span><span class="p">;</span>  <span class="c1">// Avoids missing return warning
+</span>  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">REGISTER_LAYER_CREATOR</span><span class="p">(</span><span class="n">Ve</span><span class="p">,</span> <span class="n">GetVeLayer</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<h3 id="4-编译">4. 编译</h3>
+
+<p>make</p>
+
+<h3 id="5-运行">5. 运行</h3>
+
+<p>./$CAFFE_ROOT/examples/mnist/train_lenet.sh 结果如图</p>
+
+<p><img src="/images/blog/2017-3-27/third.png" alt="third" /></p>
+
+<h2 id="难度3---待补充">难度3   待补充</h2>
+
+
+
+        <div id="disqus_container">
+            <div style="margin-bottom:20px" class="right">
+                <script type="text/javascript" charset="utf-8">
+                (function(){
+                  var _w = 86 , _h = 16;
+                  var param = {
+                    url:location.href,
+                    type:'6',
+                    count:'', /**是否显示分享数，1显示(可选)*/
+                    appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+                    title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+                    pic:'', /**分享图片的路径(可选)*/
+                    ralateUid:'3225437531', /**关联用户的UID，分享微博会@该用户(可选)*/
+                    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+                    rnd:new Date().valueOf()
+                  }
+                  var temp = [];
+                  for( var p in param ){
+                    temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+                  }
+                  document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="https://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+                })()
+                </script>
+            </div>
+<!--
+            <a href="#" class="comment" onclick="return false;">点击查看评论</a>
+-->
+            <div id="disqus_thread"></div>
+        </div>
+    </div>
+
+    <div class="sidenav">
+        <iframe width="100%" height="75" class="share_self"  frameborder="0" scrolling="no" src="https://widget.weibo.com/weiboshow/index.php?language=&width=0&height=75&fansRow=2&ptype=1&speed=0&skin=5&isTitle=0&noborder=0&isWeibo=0&isFans=0&uid=3225437531&verifier=87199cd9&dpc=1"></iframe>
+    </div>
+
+
+
+    <div class="sidenav">
+        <h2>Blog</h2>
+        <ul class="artical-list">
+        
+            <li><a href="/blog/2017/07/16/reading-note-the-truth-about-self-driving-cars.html">读文笔记 The Truth About "self-driving" Cars</a></li>
+        
+            <li><a href="/blog/2017/05/17/reading-note-A-Fast-RCNN.html">读文笔记A-Fast-RCNN</a></li>
+        
+            <li><a href="/blog/2017/05/02/double-power.html">双电源供电</a></li>
+        
+            <li><a href="/blog/2017/04/11/reading-note-FPN.html">读文笔记FPN</a></li>
+        
+            <li><a href="/blog/2017/04/10/reading-note-Speed-Accuracy.html">读文笔记Speed/Accuracy trade-offs</a></li>
+        
+            <li><a href="/blog/2017/03/29/reading-note-R-FCN.html">读文笔记R-FCN</a></li>
+        
+            <li><a href="/blog/2017/03/27/caffe-add-layer.html">caffe添加新layer</a></li>
+        
+            <li><a href="/blog/2017/03/20/reading-note-ResNet.html">读文笔记ResNet</a></li>
+        
+            <li><a href="/blog/2017/03/01/reading-note-SSD.html">读文笔记SSD</a></li>
+        
+            <li><a href="/blog/2017/02/24/reading-note-DeepMultiBox.html">读文笔记DeepMultiBox</a></li>
+        
+            <li><a href="/blog/2017/02/15/reading-note-YOLO.html">读文笔记YOLO</a></li>
+        
+            <li><a href="/blog/2017/01/05/reading-note-Faster-R-CNN.html">读文笔记Faster R-CNN</a></li>
+        
+            <li><a href="/blog/2016/12/28/reading-note-Fast-R-CNN.html">读文笔记Fast R-CNN</a></li>
+        
+            <li><a href="/blog/2016/12/23/reading-note-sppnet.html">读文笔记SPPnet</a></li>
+        
+            <li><a href="/blog/2016/12/11/who-i-am.html">我是谁</a></li>
+        
+        </ul>
+<!--
+        <h2>Opinion</h2>
+        <ul class="artical-list">
+        
+        </ul>
+-->
+        <h2>Project</h2>
+        <ul class="artical-list">
+        
+            <li><a href="/project/2017/03/25/ServerOnAndroid.html">ServerOnAndroid</a></li>
+        
+            <li><a href="/project/2017/03/05/cuda-tensorflow-install.html">cuda && tensorflow 安装</a></li>
+        
+            <li><a href="/project/2016/12/19/LuceneForAndroid.html">LuceneForAndroid</a></li>
+        
+        </ul>
+    </div>
+</div>
+
+<script src="/js/post.js" type="text/javascript"></script>
+
+
+    <script type="text/javascript">
+        $(function(){
+            $('.home-follow').click(function(e){
+                e.preventDefault();
+
+                if($('.home-contact').is(':visible')){
+                    $('.home-contact').slideUp(100);
+                }else{
+                    $('.home-contact').slideDown(100);
+                }
+            });
+        })
+    </script>
+</body>
+</html>

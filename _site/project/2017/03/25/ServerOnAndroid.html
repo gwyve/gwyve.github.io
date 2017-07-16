@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>ServerOnAndroid | gwyve</title>
+    <meta name="author" content="Gwyve" />
+    <meta name="renderer" content="webkit">
+    <meta name="description" content="VE's Blog" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta property="wb:webmaster" content="ddb1e697310369c4" />
+    <link rel="stylesheet" href="/css/default.css" type="text/css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="alternate" type="application/atom+xml" title="Recent Entries" href="/atom.xml" />
+    <script src="/js/jquery-1.7.1.min.js" type="text/javascript"></script>
+</head>
+<body>
+
+    <div class="home-menu">
+        <div class="home-icon-con">
+            <a class="home-menu-icon" href="/">gwyve</a>
+            <a class="home-follow" href="#" title="Contact Me">+</a>
+        </div>
+        <div class="home-contact">
+            <a href="http://weibo.com/3225437531/" target="_blank" style="margin-left:-5px;"><img src="http://www.weibo.com/favicon.ico" alt="" width="25"/></a>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="/js/prettify/prettify.css" />
+<style type="text/css">
+    body { background:#e8e8e8; }
+    @media screen and (max-width: 750px){
+        body { background:#fff; }
+    }
+    @media screen and (max-width: 1020px){
+        body { background:#fff; }
+    }
+</style>
+
+<div id="content">
+    <div class="entry">
+        <h1 class="entry-title"><a href="/project/2017/03/25/ServerOnAndroid.html" title="ServerOnAndroid">ServerOnAndroid</a></h1>
+        <p class="entry-date">2017-03-25</p>
+        <p>声明：本博客欢迎转发，但请保留原作者信息!    <br />
+作者：高伟毅  <br />
+博客：<a href="https://gwyve.github.io/">https://gwyve.github.io/</a>  <br />
+微博：<a href="http://weibo.com/u/3225437531/">http://weibo.com/u/3225437531/</a></p>
+
+<h2 id="引言">引言</h2>
+
+<p>这个项目是我在2015年底就打算写的项目，期初就是就是因为个人一个十分奇葩的想法：把服务器部署到Android平台上。后来，我确实有了真正的需求，逼迫我必须写这样的项目。</p>
+
+<h2 id="项目来源">项目来源</h2>
+
+<ol>
+  <li>奇葩的想法：在Android平台上运行一个服务器</li>
+  <li>完成Android与PC的数据传输。</li>
+</ol>
+
+<p>补充：因为本人对于电池不可拆卸的手机十分排斥，至今仍然在使用中兴 红牛V5max（一款可以电池可拆卸的手机）。用了不到两年的时候usb插口坏了，虽然电池可以用座充充电，但是，数据传输十分不方便，尤其，作为一个迷恋用手机看海贼的海贼迷，传输几十集动漫十分不方便，不得已，就开始设想一个这样的应用。</p>
+
+<p>ps：后来发现，把服务器部署在PC上，做一个批量下载就可以了，囧～～</p>
+
+<h2 id="代码托管">代码托管</h2>
+
+<p><a href="https://github.com/gwyve/DataWire.git">https://github.com/gwyve/DataWire.git</a></p>
+
+<h2 id="项目需求">项目需求</h2>
+
+<p>随着越来越多的Android手机的使用，越来越多的数据需要从pc传到Android手机上，或者从Android手机上传到PC上。经调查，很多用户在pc与Android互传数据都会选择微信、手机qq、百度云等app或者直接使用数据线链接，而这些app都有着各种各样的问题，比如，微信不能上传10mb以上的文件，手机qq上传之后的文件难以找到具体路径；在使用数据线时，如果数据线有一点震动都会造成传输停止。所以，能够通过无线进行pc与Android进行数据传输的app就迫切需要。</p>
+
+<p>现在手机尺寸越来越大，很多人都趋向于将Android手机当做一个视频播放器使用；而有的视频使用在线观看体验就比较差。比如作者喜欢看《海贼王》，而《海贼王》从最开始的各大视频平台都有，到后来只有搜狐视频才有，到目前之后爱奇艺才有，甚至一段时间只有一部分可以看。所以，很多海贼迷都趋向与把视频先下载下来然后用手机进行观看，一次性往手机上存上很多集，这就需要这个app能够满足用户的批量上传。同样，韩剧迷也有相同需求。
+综上所述，具体需求：</p>
+<ol>
+  <li>通过局域网wifi实现文件的下载</li>
+  <li>通过局域网wifi实现文件的上传</li>
+  <li>不必在PC上安装其他任何app</li>
+  <li>实现文件的批量上传</li>
+  <li>通过PC浏览器对Android的文件夹进行查看</li>
+  <li>文件上传速度争取在5mb/s以上</li>
+  <li>通过PC浏览器新建文件夹、删除文件(待完成)</li>
+  <li>对Android的存储空间提醒（待完成）</li>
+</ol>
+
+<h2 id="项目设计">项目设计</h2>
+
+<h3 id="架构设计">架构设计：</h3>
+
+<p>因为需求中写到不必在PC端安装任何其他软件，所以就是利用浏览器。这就需要在Android端部署一个server。因为Android所分配给app的内存空间有限，所以在具体问题上有区别部署在电脑端的server。</p>
+
+<p><img src="/images/project/2017-3-25/design.png" alt="design" /></p>
+
+<h3 id="协议分析设计">协议分析设计</h3>
+
+<p>当收到HTTP报文之后，首先获得报文的前8k（这个数值是可以修改的，目前仍然是使用这个大小），将这8k存放在内存中，然后进行解析。如果是GET请求则根据Url返回Url所指定的目录下的文件列表；如果是POST怎认为是文件上传。</p>
+
+<p>区别与传统server最大的设计在于，文件上传的过程中需要把数据量进行分割，而不是传统服务器把http报文全部存在内存，然后再对报文进行分析，再将文件进行存入文件系统。在上传文件时，浏览器端采用POST向Android server发送请求。Server根据content-length的长度，将HTTP报文body部分先分析出文件名，以及boundary，boundary之后即为文件内容。将文件内容按照第一次fileBufferSize大小读入内存，然后转存到文件系统，随后开始从socket读第二次fileBufferSize到内存，然后转存到文件系统，依次类推，直到读完一个HTTP报文。</p>
+
+<h2 id="主要难题以及解决方案">主要难题以及解决方案</h2>
+
+<h3 id="1-android手机为每个app所分配的内存空间有限">1. Android手机为每个app所分配的内存空间有限</h3>
+
+<p>每个厂商对自己手机的app分配内存空间大小都有自己的选择，但是，通常不会超过200Mb，这就要求我们在上传超大文件的时候，如果采用传统server先将报文全部读入内存然后解析方法，会造成outOfMemory的错误。我们所想到的解决方案有两个，第一个为使用ftp协议；第二个就是在项目设计中提到的解决方案。介于不需要用户在PC上安装其他软件的需求，以及目前网络上能找到ftp协议的内容较少，我们采用后者。</p>
+
+<h3 id="2不同浏览器内核对http报文的发送有区别">2.不同浏览器内核对HTTP报文的发送有区别</h3>
+
+<p>我们在测试过程中发现，firefox对post请求是一次性的全部发送，而chrome则选择先将head发送再将body发送或者一次性的全部发送，chrome选择那种发送方式是随机的，并没有规律。这就要求我们在接受报文的时候多做几次判断。</p>
+
+<h3 id="3报文的中断">3.报文的中断</h3>
+
+<p>fileBufferSize是我们在想我们需要fileBufferSize大小的报文，server就能够接收到fileBufferSize大小的报文而设定的。但是，实际情况是，很多情况每次读socket报文读出的长度都不是一个固定值，这是一个随机值。所以，我们需要针对每次读socket数据大小做一个判断。当然，我们希望每次读socket的数据大小越接近fileBufferSize应该是速度越快的。</p>
+
+<h3 id="4文件批量上传">4.文件批量上传</h3>
+
+<p>针对文件批量上传，起初有两个解决方案，第一个是采用浏览器每个POST请求都带有批量的文件数据（即，报文的body里是按照boundary+文件属性+文件数据+文件属性+文件数据+…+boundary），然后根据每个fileBufferSize大小的数据进行分析看是不是一个文件的结束和文件的开始。第二个是在PC浏览器采用异步的方式，具体使用Ajax进行实现，即使用浏览器前端形成一个文件上传队列，每个请求只发送一个文件，这样每次报文只用分析一个body和第一个fileBufferSize大小的数据。需求中提到的动漫或者韩剧，这类文件都是视频，一般都是几百兆的文件，所以，尽量不要分析那么多次的报文，最好就是直接转存。为了提高速度，我们采用第二种解决方案。</p>
+
+<h3 id="5提高文件的上传速度">5.提高文件的上传速度</h3>
+
+<p>如果，文件上传速度过慢，这样就没有满足用户的任何需求。我们在解决这样的问题，提出两个方面的解决措施：硬件和软件。硬件方面：目前wifi主要是802.11b/g/n，他被操作在2.4 GHz 的频率中，在其中这个2.4 GHz 频谱被划分为14个交叠的、错列的20 MHz 无线载波信道，它们的中心频率分别为5 MHz；随着硬件的革新，新开始普及使用的802.11a/n ，他被操作在有更多信道的 5.0GHz 频谱中，802.11n 也使用信道焊接技术联合两个 20MHz 载波信道为一个40 MHz 信道来增加吞吐量。经过测试，5GHz的频率确实比2.4GHz快，因为条件有限，导致快的因素是因为干扰问题还是硬件问题无法得知。但是，有一点目前可以确定，如果让wifi路由器使用其他wifi路由器使用最少的频道，可以有效地减少干扰，提高传输速度。软件方面：可以看出，我们之前的设计都是在考虑上传速度，根据之前的设计，我们所能修改的参数主要是fileBufferSize大小，而这个值是在考虑app内存前提下设定的，即不超过app内存，越接近每次读出socket数据大小越好。</p>
+
+<h3 id="6耦合内聚">6.耦合，内聚</h3>
+
+<p>因为整个app相当于在Android设备上部署一台小型服务器，如果处理不好耦合，那将是在Android框架的Activitiy出现各种server的代码，这样在代码的维护上产生了很大问题。所以，我们将几乎所有的server部分代码都写在com.gwyve包内，在Android的mainActivitiy中使用单例模式生成server来进行server部分的功能。因为Android自身其他进程不能阻塞界面进程的机制，server部分与Actcivity部分使用Handler进行通信，以此达到server部分控制Activity部分的显示。</p>
+
+<h2 id="代码实现">代码实现</h2>
+
+<p>项目主要目录截图：</p>
+
+<p><img src="/images/project/2017-3-25/code.png" alt="code" /></p>
+
+<p>说明：SplashActivity是app开机时的欢迎界面，MainActivity是app启动server和停止server的界面。MiniServer是server部分的主要内容，包括对报文的解析，上传、显示、下载文件的内容；HtmlUtil为server中用于显示html网页的内容工具，以及Ajax异步上传文件的代码；Util为工具类，主要为获得Android局域网内ip地址和app的端口。</p>
+
+<h3 id="1单例模式生成server">1.单例模式生成server</h3>
+
+<p>Path:com.ve.administrator.datawire.MainActivity</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="k">if</span> <span class="o">(</span><span class="n">miniServerThread</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+    <span class="n">miniServer</span> <span class="o">=</span> <span class="n">MiniServer</span><span class="o">.</span><span class="na">singletonMiniServer</span><span class="o">(</span><span class="n">Environment</span><span class="o">.</span><span class="na">getExternalStorageDirectory</span><span class="o">(),</span> <span class="n">ip</span><span class="o">,</span> <span class="n">textViewHandler</span><span class="o">);</span>
+    <span class="n">miniServerThread</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">miniServer</span><span class="o">);</span>
+    <span class="n">miniServerThread</span><span class="o">.</span><span class="na">setDaemon</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+    <span class="n">miniServerThread</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+<span class="o">}</span><span class="k">else</span><span class="o">{</span>
+    <span class="k">if</span><span class="o">(!</span><span class="n">miniServerThread</span><span class="o">.</span><span class="na">isAlive</span><span class="o">()){</span>
+        <span class="n">miniServerThread</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+    <span class="n">textView</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">"Please put \""</span><span class="o">+</span><span class="n">miniServer</span><span class="o">.</span><span class="na">ip</span><span class="o">+</span><span class="s">":"</span><span class="o">+</span><span class="n">miniServer</span><span class="o">.</span><span class="na">port</span><span class="o">+</span><span class="s">"\" as path address in the browser!"</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<h3 id="2获得http报文的前8k内容">2.获得HTTP报文的前8k内容</h3>
+
+<p>Path：com.gwyve.MiniServer</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">final</span> <span class="kt">int</span> <span class="n">bufsize</span> <span class="o">=</span> <span class="mi">8192</span><span class="o">;</span>
+<span class="n">InputStream</span> <span class="n">is</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">();</span>
+<span class="k">if</span><span class="o">(</span><span class="n">is</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+    <span class="k">return</span><span class="o">;</span>
+<span class="kt">byte</span><span class="o">[]</span> <span class="n">buf</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">bufsize</span><span class="o">];</span>
+<span class="kt">int</span> <span class="n">splitbyte</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+<span class="kt">int</span> <span class="n">hrlen</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+<span class="kt">int</span> <span class="n">read</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">bufsize</span><span class="o">);</span>
+<span class="o">{</span>
+    <span class="k">while</span> <span class="o">(</span><span class="n">read</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
+    <span class="o">{</span>
+        <span class="n">hrlen</span> <span class="o">+=</span> <span class="n">read</span><span class="o">;</span>
+        <span class="n">splitbyte</span> <span class="o">=</span> <span class="n">findHeaderEnd</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="n">hrlen</span><span class="o">);</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">splitbyte</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="k">break</span><span class="o">;</span>
+        <span class="n">read</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="n">hrlen</span><span class="o">,</span> <span class="n">bufsize</span> <span class="o">-</span> <span class="n">hrlen</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+<span class="n">decodeHeader</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="n">parms</span><span class="o">,</span><span class="n">header</span><span class="o">);</span>
+</code></pre>
+</div>
+
+<h3 id="3解析http报文head">3.解析HTTP报文head</h3>
+
+<p>Path：com.gwyve.MiniServer</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">private</span> <span class="kt">void</span> <span class="nf">decodeHeader</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">buf</span><span class="o">,</span><span class="n">Properties</span> <span class="n">parms</span><span class="o">,</span><span class="n">Properties</span> <span class="n">header</span><span class="o">){</span>
+    <span class="n">String</span> <span class="n">bufStr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>
+    <span class="n">String</span><span class="o">[]</span> <span class="n">bufStrArr</span> <span class="o">=</span> <span class="n">bufStr</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s">"\r\n"</span><span class="o">);</span>
+    <span class="k">if</span><span class="o">(</span><span class="n">bufStrArr</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">indexOf</span><span class="o">(</span><span class="s">" "</span><span class="o">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">&amp;&amp;</span><span class="n">bufStrArr</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"HTTP"</span><span class="o">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">){</span>
+        <span class="n">parms</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"method"</span><span class="o">,</span> <span class="n">bufStrArr</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">bufStrArr</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">indexOf</span><span class="o">(</span><span class="s">" "</span><span class="o">)));</span>
+        <span class="n">parms</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"uri"</span><span class="o">,</span><span class="n">bufStrArr</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">subSequence</span><span class="o">(</span><span class="n">bufStrArr</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">indexOf</span><span class="o">(</span><span class="s">" "</span><span class="o">)+</span><span class="mi">1</span><span class="o">,</span> <span class="n">bufStrArr</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"HTTP"</span><span class="o">)-</span><span class="mi">1</span><span class="o">));</span>
+    <span class="o">}</span>
+    <span class="k">for</span><span class="o">(</span><span class="n">String</span> <span class="n">str</span> <span class="o">:</span> <span class="n">bufStrArr</span><span class="o">){</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"boundary"</span><span class="o">)!=-</span><span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"="</span><span class="o">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">){</span>
+            <span class="n">parms</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"boundary"</span><span class="o">,</span> <span class="n">str</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"="</span><span class="o">)+</span><span class="mi">1</span><span class="o">,</span><span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">()));</span>
+        <span class="o">}</span><span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"Host"</span><span class="o">)!=-</span><span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">" "</span><span class="o">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">){</span>
+            <span class="n">parms</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"host"</span><span class="o">,</span> <span class="n">str</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">" "</span><span class="o">)+</span><span class="mi">1</span><span class="o">,</span> <span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">()));</span>
+        <span class="o">}</span><span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"Content-Length"</span><span class="o">)!=-</span><span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">" "</span><span class="o">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">){</span>
+            <span class="n">parms</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"content-length"</span><span class="o">,</span> <span class="n">str</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">" "</span><span class="o">)+</span><span class="mi">1</span><span class="o">,</span><span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">()));</span>
+        <span class="o">}</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">str</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">str</span><span class="o">.</span><span class="na">trim</span><span class="o">().</span><span class="na">length</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">){</span>
+            <span class="kt">int</span> <span class="n">p</span> <span class="o">=</span> <span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span> <span class="sc">':'</span> <span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span> <span class="n">p</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">){</span>
+                <span class="n">header</span><span class="o">.</span><span class="na">put</span><span class="o">(</span> <span class="n">str</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="n">p</span><span class="o">).</span><span class="na">trim</span><span class="o">().</span><span class="na">toLowerCase</span><span class="o">(),</span> <span class="n">str</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="o">).</span><span class="na">trim</span><span class="o">());</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<h3 id="4处理文件上传相关代码">4.处理文件上传相关代码</h3>
+
+<p>Path：com.gwyve.MiniServer</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">private</span> <span class="n">String</span> <span class="nf">uploadFile</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">beginBuf</span><span class="o">,</span><span class="kt">int</span> <span class="n">hrlen</span><span class="o">,</span><span class="kt">int</span> <span class="n">splitbyte</span><span class="o">,</span><span class="n">String</span> <span class="n">dirPath</span><span class="o">,</span><span class="n">InputStream</span> <span class="n">is</span><span class="o">,</span> <span class="n">Properties</span> <span class="n">parms</span><span class="o">){</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">fileBeginbyte</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+            <span class="kt">int</span> <span class="n">rlen</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">;</span>
+            <span class="kt">int</span> <span class="n">boundaryLength</span> <span class="o">=</span> <span class="n">parms</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"boundary"</span><span class="o">).</span><span class="na">getBytes</span><span class="o">().</span><span class="na">length</span><span class="o">;</span>
+            <span class="kt">long</span> <span class="n">size</span> <span class="o">=</span> <span class="mh">0x7</span><span class="n">FFFFFFFFFFFFFFFl</span><span class="o">;</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">parms</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"content-length"</span><span class="o">)!=</span><span class="kc">null</span><span class="o">)</span>
+            <span class="o">{</span>
+                <span class="k">try</span> <span class="o">{</span> <span class="n">size</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">parms</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"content-length"</span><span class="o">));</span> <span class="o">}</span>
+                <span class="k">catch</span> <span class="o">(</span><span class="n">NumberFormatException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{}</span>
+            <span class="o">}</span>
+
+            <span class="n">fileBeginbyte</span> <span class="o">=</span> <span class="n">findFileBegin</span><span class="o">(</span><span class="n">beginBuf</span><span class="o">,</span> <span class="n">splitbyte</span><span class="o">,</span> <span class="n">hrlen</span><span class="o">);</span>
+            <span class="kt">byte</span><span class="o">[]</span>  <span class="n">fileBuf</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">fileBufferSize</span><span class="o">];</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">fileBeginbyte</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">){</span>
+                <span class="n">findBodyInfo</span><span class="o">(</span><span class="n">beginBuf</span><span class="o">,</span> <span class="n">parms</span><span class="o">);</span>
+                <span class="n">File</span> <span class="n">outFile</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">dirPath</span> <span class="o">+</span><span class="s">"/"</span><span class="o">+</span> <span class="n">parms</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"filename"</span><span class="o">));</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">outFile</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span>
+                    <span class="n">outFile</span><span class="o">.</span><span class="na">delete</span><span class="o">();</span>
+                <span class="n">outFile</span><span class="o">.</span><span class="na">createNewFile</span><span class="o">();</span>
+                <span class="n">OutputStream</span> <span class="n">os</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">outFile</span><span class="o">);</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">hrlen</span> <span class="o">&gt;=</span> <span class="n">splitbyte</span><span class="o">+</span><span class="n">size</span><span class="o">-(</span><span class="n">boundaryLength</span><span class="o">+</span><span class="mi">8</span><span class="o">))</span>
+                <span class="o">{</span>
+                    <span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">beginBuf</span><span class="o">,</span> <span class="n">fileBeginbyte</span><span class="o">,</span> <span class="n">splitbyte</span><span class="o">+(</span><span class="kt">int</span><span class="o">)</span><span class="n">size</span><span class="o">-(</span><span class="n">boundaryLength</span><span class="o">+</span><span class="mi">8</span> <span class="o">)-</span><span class="n">fileBeginbyte</span><span class="o">);</span>
+                    <span class="n">os</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+                <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                    <span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">beginBuf</span><span class="o">,</span> <span class="n">fileBeginbyte</span><span class="o">,</span> <span class="n">hrlen</span> <span class="o">-</span> <span class="n">fileBeginbyte</span><span class="o">);</span>
+
+                    <span class="n">size</span> <span class="o">-=</span> <span class="o">(</span><span class="n">hrlen</span><span class="o">-</span><span class="n">splitbyte</span><span class="o">)</span> <span class="o">+(</span><span class="n">boundaryLength</span><span class="o">+</span><span class="mi">8</span><span class="o">)</span> <span class="o">;</span>
+                    <span class="n">rlen</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">fileBufferSize</span><span class="o">);</span>
+                    <span class="k">while</span><span class="o">(</span><span class="n">size</span><span class="o">-</span><span class="n">rlen</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">rlen</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">){</span>
+                        <span class="k">if</span><span class="o">(</span><span class="n">rlen</span> <span class="o">==</span> <span class="n">fileBufferSize</span><span class="o">){</span>
+                            <span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">);</span>
+                        <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                            <span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">rlen</span><span class="o">);</span>
+                        <span class="o">}</span>
+                        <span class="n">size</span> <span class="o">-=</span> <span class="n">rlen</span><span class="o">;</span>
+                        <span class="n">rlen</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">fileBufferSize</span><span class="o">);</span>
+                    <span class="o">}</span>
+                    <span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span><span class="n">size</span><span class="o">);</span>
+                    <span class="n">os</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                <span class="n">fileBeginbyte</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+                <span class="k">while</span><span class="o">(</span><span class="n">rlen</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">){</span>
+                    <span class="n">rlen</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">fileBufferSize</span><span class="o">);</span>
+                    <span class="n">fileBeginbyte</span> <span class="o">=</span> <span class="n">findHeaderEnd</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span> <span class="n">rlen</span><span class="o">);</span>
+                    <span class="k">if</span><span class="o">(</span><span class="n">fileBeginbyte</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">){</span>
+                        <span class="k">break</span><span class="o">;</span>
+                    <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                        <span class="n">size</span> <span class="o">-=</span> <span class="n">rlen</span><span class="o">;</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+                <span class="n">size</span><span class="o">-=</span><span class="n">fileBeginbyte</span><span class="o">+(</span><span class="n">boundaryLength</span><span class="o">+</span><span class="mi">8</span><span class="o">);</span>
+                <span class="n">findBodyInfo</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span> <span class="n">parms</span><span class="o">);</span>
+                <span class="n">File</span> <span class="n">outFile</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">dirPath</span> <span class="o">+</span><span class="s">"/"</span><span class="o">+</span> <span class="n">parms</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"filename"</span><span class="o">));</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">outFile</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span>
+                    <span class="n">outFile</span><span class="o">.</span><span class="na">delete</span><span class="o">();</span>
+                <span class="n">outFile</span><span class="o">.</span><span class="na">createNewFile</span><span class="o">();</span>
+                <span class="n">OutputStream</span> <span class="n">os</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">outFile</span><span class="o">);</span>
+
+                <span class="k">if</span><span class="o">(</span><span class="n">rlen</span> <span class="o">&lt;</span> <span class="n">fileBufferSize</span><span class="o">){</span>
+                    <span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span> <span class="n">fileBeginbyte</span><span class="o">,</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span><span class="n">size</span><span class="o">);</span>
+                    <span class="n">os</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+                <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">fileBeginbyte</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span><span class="n">fileBufferSize</span><span class="o">;</span><span class="n">i</span><span class="o">++)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span>
+
+                    <span class="n">size</span> <span class="o">+=</span> <span class="n">fileBeginbyte</span> <span class="o">-</span> <span class="n">fileBufferSize</span><span class="o">;</span>
+                    <span class="n">rlen</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span><span class="mi">0</span><span class="o">,</span><span class="n">fileBufferSize</span><span class="o">);</span>
+                    <span class="k">while</span><span class="o">((</span><span class="n">size</span><span class="o">-</span><span class="n">rlen</span><span class="o">)&gt;</span><span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">rlen</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">){</span>
+                        <span class="k">if</span><span class="o">(</span><span class="n">rlen</span> <span class="o">==</span> <span class="n">fileBufferSize</span><span class="o">){</span>
+                            <span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">);</span>
+                        <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                            <span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">rlen</span><span class="o">);</span>
+                        <span class="o">}</span>
+                        <span class="n">size</span> <span class="o">-=</span> <span class="n">rlen</span><span class="o">;</span>
+                        <span class="n">rlen</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span><span class="mi">0</span><span class="o">,</span><span class="n">fileBufferSize</span><span class="o">);</span>
+                    <span class="o">}</span>
+                    <span class="n">os</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileBuf</span><span class="o">,</span><span class="mi">0</span><span class="o">,(</span><span class="kt">int</span><span class="o">)</span><span class="n">size</span><span class="o">);</span>
+                    <span class="n">os</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+                <span class="o">}</span>
+
+            <span class="o">}</span>
+        <span class="o">}</span><span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"error"</span><span class="o">+</span><span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+</code></pre>
+</div>
+
+<h3 id="5分析http-post请求关于文件开端和boundary等信息">5.分析HTTP POST请求关于文件开端和boundary等信息</h3>
+
+<p>Path：com.gwyve.MiniServer</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">private</span> <span class="kt">int</span> <span class="nf">findFileBegin</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">buf</span><span class="o">,</span> <span class="kt">int</span> <span class="n">splitbyte</span><span class="o">,</span> <span class="kt">int</span> <span class="n">hrlen</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// TODO Auto-generated method stub</span>
+    <span class="k">while</span> <span class="o">(</span><span class="n">splitbyte</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">&lt;</span> <span class="n">hrlen</span><span class="o">)</span>
+    <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">buf</span><span class="o">[</span><span class="n">splitbyte</span><span class="o">]</span> <span class="o">==</span> <span class="sc">'\r'</span> <span class="o">&amp;&amp;</span> <span class="n">buf</span><span class="o">[</span><span class="n">splitbyte</span> <span class="o">+</span> <span class="mi">1</span><span class="o">]</span> <span class="o">==</span> <span class="sc">'\n'</span> <span class="o">&amp;&amp;</span> <span class="n">buf</span><span class="o">[</span><span class="n">splitbyte</span> <span class="o">+</span> <span class="mi">2</span><span class="o">]</span> <span class="o">==</span> <span class="sc">'\r'</span> <span class="o">&amp;&amp;</span> <span class="n">buf</span><span class="o">[</span><span class="n">splitbyte</span> <span class="o">+</span> <span class="mi">3</span><span class="o">]</span> <span class="o">==</span> <span class="sc">'\n'</span><span class="o">)</span>
+            <span class="k">return</span> <span class="n">splitbyte</span> <span class="o">+</span> <span class="mi">4</span><span class="o">;</span>
+        <span class="n">splitbyte</span><span class="o">++;</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="o">;</span>
+<span class="o">}</span>
+<span class="kd">private</span> <span class="kt">void</span> <span class="nf">findBodyInfo</span><span class="o">(</span><span class="kd">final</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">buf</span><span class="o">,</span><span class="n">Properties</span> <span class="n">parms</span><span class="o">){</span>
+    <span class="n">String</span> <span class="n">string</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>
+    <span class="n">String</span><span class="o">[]</span> <span class="n">strArr</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s">"\r\n"</span><span class="o">);</span>
+    <span class="k">for</span><span class="o">(</span><span class="n">String</span> <span class="n">str</span> <span class="o">:</span> <span class="n">strArr</span><span class="o">){</span>
+        <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">"111"</span><span class="o">,</span><span class="n">str</span><span class="o">);</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"filename"</span><span class="o">)!=-</span><span class="mi">1</span><span class="o">){</span>
+            <span class="n">parms</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"filename"</span><span class="o">,</span> <span class="n">str</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"filename"</span><span class="o">)+</span><span class="mi">10</span><span class="o">,</span> <span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">()-</span><span class="mi">1</span><span class="o">));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<h3 id="6批量上传前端ajax代码">6.批量上传前端Ajax代码</h3>
+
+<p>Path：com.gwyve.HtmlUtil</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">String</span> <span class="n">js</span> <span class="o">=</span><span class="s">"&lt;script type=\"text/javascript\"&gt;"</span> <span class="o">+</span>
+        <span class="s">"\tfunction uploadfiles(){\n"</span> <span class="o">+</span>
+        <span class="s">"\t\tvar files = document.getElementById(\"files\").files;\n"</span> <span class="o">+</span>
+        <span class="s">"\t\tvar url = window.location.href; \n"</span> <span class="o">+</span>
+        <span class="s">"\t\tdocument.getElementById(\"uploading\").style.display=\"block\";\n"</span> <span class="o">+</span>
+        <span class="s">"\t\tdocument.getElementById(\"uploaded\").style.display=\"block\";\n"</span> <span class="o">+</span>
+        <span class="s">"\t\tvar i=0;\n"</span> <span class="o">+</span>
+        <span class="s">"\t\tuploadfile(files,url,i);\n"</span> <span class="o">+</span>
+        <span class="s">"\t}\n"</span> <span class="o">+</span>
+        <span class="s">"\n"</span> <span class="o">+</span>
+        <span class="s">"function uploadfile(files,url,i){\n"</span> <span class="o">+</span>
+        <span class="s">"\t\tif(i&lt;files.length){\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\tvar file = files[i];\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\tdocument.getElementById(\"uploading\").innerHTML = \"&lt;p&gt;\"+file.name+\" is uploading...\";\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\tvar form = new FormData();\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\tform.append(\"file\",file);\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\tvar xhr = new XMLHttpRequest();\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\txhr.open(\"post\",url,true);\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\txhr.send(form);\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\txhr.onreadystatechange = function(){\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\tif(xhr.readyState == 4){\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\t\tif(xhr.status == 200){\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\t\t\tdocument.getElementById(\"uploading\").innerHTML = \"&lt;p&gt;\"+file.name+\" has been uploaded.\"+\"&lt;/p&gt;\";\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\t\t\tdocument.getElementById(\"uploaded\").innerHTML += \"&lt;br&gt;\"+file.name;\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\t\t\txhr = null;\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\t\t\tuploadfile(files,url,i+1);\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\t\t}else{\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\t\t\txhr = null;\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\t\t\tuploadfile(files,url,i);\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\t\t}\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t\t}\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\t}\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t}else{\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\tdocument.getElementById(\"uploading\").innerHTML=\"&lt;p&gt;all \"+files.length+\" files have been uploaded.&lt;/p&gt;\";\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t\talert(\"All \"+files.length+\" files has been uploaded.\");\n"</span> <span class="o">+</span>
+        <span class="s">"\t\t}\n"</span> <span class="o">+</span>
+        <span class="s">"\t}"</span> <span class="o">+</span>
+        <span class="s">"&lt;/script&gt;"</span><span class="o">;</span>
+</code></pre>
+</div>
+
+<h2 id="界面演示">界面演示</h2>
+
+<h3 id="app欢迎界面">app欢迎界面</h3>
+
+<p><img src="/images/project/2017-3-25/hello.png" alt="hello" /></p>
+
+<h3 id="app主界面">app主界面</h3>
+
+<p><img src="/images/project/2017-3-25/main_view.png" alt="main_view" /></p>
+
+<h3 id="pc主界面">PC主界面</h3>
+
+<p><img src="/images/project/2017-3-25/PC_main_view.png" alt="PC_main_view" /></p>
+
+<p><img src="/images/project/2017-3-25/PC_main_view2.png" alt="PC_main_view2" /></p>
+
+<h3 id="文件上传界面">文件上传界面</h3>
+
+<p><img src="/images/project/2017-3-25/upload.png" alt="upload" /></p>
+
+<h3 id="文件上传完成界面">文件上传完成界面</h3>
+
+<p><img src="/images/project/2017-3-25/uploaded.png" alt="uploaded" /></p>
+
+<h2 id="总结">总结</h2>
+
+<p>整个项目的一开始的项目需求都是以本人的需求为出发点的，始终秉承着自己发现问题，自己解决问题的出发点，虽然满足了个人需求，属于个人的定制，但是，缺乏大众的认可度。主要就是并不知道其他用户是否有这样的需求，当然，在日后的工作生活中，仍然要寻找自己的需求，同时也要侧重一下公众需求。
+从这个项目中，我学到了很多东西，尤其对课堂上所讲的HTTP协议有了更为深入的理解，除此之外，还有以下几个方面的获得：</p>
+<ul>
+  <li>了解了各种浏览器内核对HTTP报文发送的流程</li>
+  <li>了解了路由器的相关硬件知识，例如频率和频道</li>
+  <li>理解掌握了字节流和字符流的区别</li>
+  <li>深入实现了socket编程</li>
+  <li>颠覆了曾经对server的理解，获得了新的认识</li>
+  <li>对Android对app内存的分配有了深入的理解</li>
+</ul>
+
+<p>综上，虽然整个项目仍然在某些方面有些不足，但是整体功能是实现了的，而且获得了如上许多知识，同时当整个项目完成的时候，那种成就感也是无以言表的。</p>
+
+<h2 id="项目展望">项目展望</h2>
+
+<p>随着研二回所日期的到来，整个项目也面临着一个中止。这个项目除了最后两点需求没有满足，其他的需求全部满足，这样，整个项目就是成功的。
+我们不难发现，这就是校园里的课程设计，与社会上的软件产品还是有较大的区别的。如果这个项目当做一个产品来做，在以下几个方面还需要加强：</p>
+<ol>
+  <li>文件上传进度提醒</li>
+  <li>Android存储空间提醒</li>
+  <li>文件以及文件夹的新建和删除</li>
+  <li>界面的美化</li>
+  <li>欢迎页的引导使用</li>
+</ol>
+
+<p>之前觉得这是这个项目的结束，写完上面这几个发现作为产品还有好多东西要做，我们不能一下写完美的软件，但是，我们可以选择趋于完美。</p>
+
+<h2 id="感谢">感谢</h2>
+
+<p>这里特别感谢<a href="https://github.com/NanoHttpd/nanohttpd">nanohttpd</a>，部分代码借鉴nanohttpd的思想。在这里需要指出，nanohttpd没有处理一个大文件上传的情况，我在这里解决了大文件上传oom的情况，争取有朝一日能够为nanohttpd贡献自己的力量。</p>
+
+
+        <div id="disqus_container">
+            <div style="margin-bottom:20px" class="right">
+                <script type="text/javascript" charset="utf-8">
+                (function(){
+                  var _w = 86 , _h = 16;
+                  var param = {
+                    url:location.href,
+                    type:'6',
+                    count:'', /**是否显示分享数，1显示(可选)*/
+                    appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+                    title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+                    pic:'', /**分享图片的路径(可选)*/
+                    ralateUid:'3225437531', /**关联用户的UID，分享微博会@该用户(可选)*/
+                    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+                    rnd:new Date().valueOf()
+                  }
+                  var temp = [];
+                  for( var p in param ){
+                    temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+                  }
+                  document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="https://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+                })()
+                </script>
+            </div>
+<!--
+            <a href="#" class="comment" onclick="return false;">点击查看评论</a>
+-->
+            <div id="disqus_thread"></div>
+        </div>
+    </div>
+
+    <div class="sidenav">
+        <iframe width="100%" height="75" class="share_self"  frameborder="0" scrolling="no" src="https://widget.weibo.com/weiboshow/index.php?language=&width=0&height=75&fansRow=2&ptype=1&speed=0&skin=5&isTitle=0&noborder=0&isWeibo=0&isFans=0&uid=3225437531&verifier=87199cd9&dpc=1"></iframe>
+    </div>
+
+
+
+    <div class="sidenav">
+        <h2>Blog</h2>
+        <ul class="artical-list">
+        
+            <li><a href="/blog/2017/07/16/reading-note-the-truth-about-self-driving-cars.html">读文笔记 The Truth About "self-driving" Cars</a></li>
+        
+            <li><a href="/blog/2017/05/17/reading-note-A-Fast-RCNN.html">读文笔记A-Fast-RCNN</a></li>
+        
+            <li><a href="/blog/2017/05/02/double-power.html">双电源供电</a></li>
+        
+            <li><a href="/blog/2017/04/11/reading-note-FPN.html">读文笔记FPN</a></li>
+        
+            <li><a href="/blog/2017/04/10/reading-note-Speed-Accuracy.html">读文笔记Speed/Accuracy trade-offs</a></li>
+        
+            <li><a href="/blog/2017/03/29/reading-note-R-FCN.html">读文笔记R-FCN</a></li>
+        
+            <li><a href="/blog/2017/03/27/caffe-add-layer.html">caffe添加新layer</a></li>
+        
+            <li><a href="/blog/2017/03/20/reading-note-ResNet.html">读文笔记ResNet</a></li>
+        
+            <li><a href="/blog/2017/03/01/reading-note-SSD.html">读文笔记SSD</a></li>
+        
+            <li><a href="/blog/2017/02/24/reading-note-DeepMultiBox.html">读文笔记DeepMultiBox</a></li>
+        
+            <li><a href="/blog/2017/02/15/reading-note-YOLO.html">读文笔记YOLO</a></li>
+        
+            <li><a href="/blog/2017/01/05/reading-note-Faster-R-CNN.html">读文笔记Faster R-CNN</a></li>
+        
+            <li><a href="/blog/2016/12/28/reading-note-Fast-R-CNN.html">读文笔记Fast R-CNN</a></li>
+        
+            <li><a href="/blog/2016/12/23/reading-note-sppnet.html">读文笔记SPPnet</a></li>
+        
+            <li><a href="/blog/2016/12/11/who-i-am.html">我是谁</a></li>
+        
+        </ul>
+<!--
+        <h2>Opinion</h2>
+        <ul class="artical-list">
+        
+        </ul>
+-->
+        <h2>Project</h2>
+        <ul class="artical-list">
+        
+            <li><a href="/project/2017/03/25/ServerOnAndroid.html">ServerOnAndroid</a></li>
+        
+            <li><a href="/project/2017/03/05/cuda-tensorflow-install.html">cuda && tensorflow 安装</a></li>
+        
+            <li><a href="/project/2016/12/19/LuceneForAndroid.html">LuceneForAndroid</a></li>
+        
+        </ul>
+    </div>
+</div>
+
+<script src="/js/post.js" type="text/javascript"></script>
+
+
+    <script type="text/javascript">
+        $(function(){
+            $('.home-follow').click(function(e){
+                e.preventDefault();
+
+                if($('.home-contact').is(':visible')){
+                    $('.home-contact').slideUp(100);
+                }else{
+                    $('.home-contact').slideDown(100);
+                }
+            });
+        })
+    </script>
+</body>
+</html>

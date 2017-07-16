@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>读文笔记Speed/Accuracy trade-offs | gwyve</title>
+    <meta name="author" content="Gwyve" />
+    <meta name="renderer" content="webkit">
+    <meta name="description" content="VE's Blog" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta property="wb:webmaster" content="ddb1e697310369c4" />
+    <link rel="stylesheet" href="/css/default.css" type="text/css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="alternate" type="application/atom+xml" title="Recent Entries" href="/atom.xml" />
+    <script src="/js/jquery-1.7.1.min.js" type="text/javascript"></script>
+</head>
+<body>
+
+    <div class="home-menu">
+        <div class="home-icon-con">
+            <a class="home-menu-icon" href="/">gwyve</a>
+            <a class="home-follow" href="#" title="Contact Me">+</a>
+        </div>
+        <div class="home-contact">
+            <a href="http://weibo.com/3225437531/" target="_blank" style="margin-left:-5px;"><img src="http://www.weibo.com/favicon.ico" alt="" width="25"/></a>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="/js/prettify/prettify.css" />
+<style type="text/css">
+    body { background:#e8e8e8; }
+    @media screen and (max-width: 750px){
+        body { background:#fff; }
+    }
+    @media screen and (max-width: 1020px){
+        body { background:#fff; }
+    }
+</style>
+
+<div id="content">
+    <div class="entry">
+        <h1 class="entry-title"><a href="/blog/2017/04/10/reading-note-Speed-Accuracy.html" title="读文笔记Speed/Accuracy trade-offs">读文笔记Speed/Accuracy trade-offs</a></h1>
+        <p class="entry-date">2017-04-10</p>
+        <p>声明：本博客欢迎转发，但请保留原作者信息!    <br />
+作者：高伟毅  <br />
+博客：<a href="https://gwyve.github.io/">https://gwyve.github.io/</a>  <br />
+微博：<a href="http://weibo.com/u/3225437531/">http://weibo.com/u/3225437531/</a></p>
+
+<h2 id="引言">引言</h2>
+
+<p>这个文章应该是对最近三个object Detection模型（SSD、Faster R-CNN、R-FCN）的一个总结，作者主要用了同一个框架（Tensorflow）重写了三个模型，并结合不同特征提取器和各种参数，做了一个对比。数据集使用2016 COCO。目前，还没有发现作者公布代码托管。</p>
+
+<h2 id="发表位置">发表位置</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/1611.10012">PDF arXiv：1611.10012.pdf</a></li>
+</ul>
+
+<h2 id="问题引入">问题引入</h2>
+
+<p>目前object Detection的方法有很多，在选择上存在较难，急需有个针对这些模型的对比。针对这一问题，作者使用tensorflow把这些模型全部实现了一遍，并有针对性地修改某些参数，进行对比。</p>
+
+<h2 id="meta-atchitectures">Meta-atchitectures</h2>
+
+<p>三个模型（SSD、Faster R-CNN、R-FCN）都使用了“Anchor”的想法，作者指出，有的时候，这个被叫做“priors”、“default boxes”，所包含的意思都是，提前出一个框，然后再微调。</p>
+
+<p>这个Anchor的选择上，最开始的MultiBox<sub>[1]</sub>，是用真框聚类。最近的工作都是tiling出的。</p>
+
+<p>这个损失函数：</p>
+
+<p><img src="/images/blog/2017-4-10/loss.png" alt="LOSS" /></p>
+
+<p>三个模型的对比，我之前都总结了：</p>
+
+<p><a href="http://gwyve.github.io/blog/2017/03/01/reading-note-SSD.html">SSD</a></p>
+
+<p><a href="http://gwyve.github.io/blog/2017/01/05/reading-note-Faster-R-CNN.html">Faster R-CNN</a></p>
+
+<p><a href="http://gwyve.github.io/blog/2017/03/29/reading-note-R-FCN.html">R-FCN</a></p>
+
+<p><img src="/images/blog/2017-4-10/meta-arch.png" alt="meta-arch" /></p>
+
+<h2 id="feature-extractors">Feature extractors</h2>
+
+<p>用了六个特征提取网络，其中mobileNet我并没有找到；这个待之后总结。</p>
+
+<p>这几个object Detection模型使用的具体情况如下：</p>
+
+<p><img src="/images/blog/2017-4-10/Feature_extractors.png" alt="Feature_extractors" /></p>
+
+<p>这网络在分类上的效果如下：</p>
+
+<p><img src="/images/blog/2017-4-10/classi.png" alt="classi" /></p>
+
+<h3 id="vgg-162">VGG-16<sub>[2]</sub></h3>
+
+<p><img src="/images/blog/2017-3-1/VGG.png" alt="VGG" /></p>
+
+<h3 id="resnet-1013">Resnet-101<sub>[3]</sub></h3>
+
+<p><img src="/images/blog/2017-4-10/ResNet.png" alt="ResNet" /></p>
+
+<h3 id="inception-v24">Inception v2<sub>[4]</sub></h3>
+
+<p>添加BN（Batch Normalization）的Inception</p>
+
+<h3 id="inception-v35">Inception v3<sub>[5]</sub></h3>
+
+<p>为了提高速度把3x3换成1x3和3x1</p>
+
+<h3 id="inception-resnet-v26">Inception Resnet v2<sub>[6]</sub></h3>
+
+<p>在Resnet上应用Inception</p>
+
+<h3 id="mobilenet7">MobileNet<sub>[7]</sub></h3>
+
+<p>没有找到相关资料，坐等CVPR 2017之后</p>
+
+<h2 id="训练和调超参">训练和调超参</h2>
+
+<ul>
+  <li>异步梯度更新，使用distributed cluster<sub>[8]</sub></li>
+  <li>Faster R-CNN、R-FCN用的是end-to-end，而不是4步训练</li>
+  <li>因为内存问题，作者有时用的batch size不是32</li>
+</ul>
+
+<h2 id="硬件">硬件</h2>
+
+<ul>
+  <li>32GB RAM</li>
+  <li>Intel Xeon E5-1650 v2</li>
+  <li>Nvidia GeForce GTK Titan X</li>
+</ul>
+
+<h2 id="分析">分析</h2>
+
+<h3 id="正确率vs时间">正确率vs时间</h3>
+
+<p>SSD、R-FCN速度快过Faster R-CNN</p>
+
+<p><img src="/images/blog/2017-4-10/accuracy_time.png" alt="accuracy_time" /></p>
+
+<h3 id="重要点的模型">重要点的模型</h3>
+
+<p><img src="/images/blog/2017-4-10/CriticalPoint.png" alt="CriticalPoint" /></p>
+
+<h3 id="特征提取网络结构的影响">特征提取（网络结构）的影响</h3>
+
+<p>与直觉相同，在分类上好的mAP高</p>
+
+<p><img src="/images/blog/2017-4-10/netVSmap.png" alt="netVSmap" /></p>
+
+<h3 id="objcet-大小影响">objcet 大小影响</h3>
+
+<p>在大objcet都挺好，SSD在小object上很不好。</p>
+
+<p><img src="/images/blog/2017-4-10/objcetSize.png" alt="objcetSize" /></p>
+
+<h3 id="推荐区域数量的影响">推荐区域数量的影响</h3>
+
+<p>Faster R-CNN、R-FCN是从RPN里推荐出数量的。这里只对比这两个模型，</p>
+
+<p><img src="/images/blog/2017-4-10/proposal.png" alt="proposal" /></p>
+
+<h3 id="flops分析">FLOPs分析</h3>
+
+<p>这个要表达的意思，我还是不太了解。</p>
+
+<p><img src="/images/blog/2017-4-10/GPUtime.png" alt="GPUtime" /></p>
+
+<h3 id="内存分析">内存分析</h3>
+
+<p>SSD使用最少</p>
+
+<p><img src="/images/blog/2017-4-10/Memory.png" alt="Memory" /></p>
+
+<p><img src="/images/blog/2017-4-10/MemoryVStime.png" alt="MemoryVStime" /></p>
+
+<h2 id="个人总结">个人总结</h2>
+
+<p>虽然SSD在mAP和small object上有欠缺，但是，他在内存使用和时间上，都表现较好，这个跟他single stage网络结构和default box的数量有关吧。</p>
+
+<p>残差表现的很好，可是没有公布的训练好的模型参数，或许是我没有找到，使用ResNet或者Inception v4应该有不错的表现。</p>
+
+<h2 id="个人想法">个人想法</h2>
+
+<p>如果把这篇文章看做是一种综述，那作者所做的确实不只是调研；论文的另一种写法把。可以说，这个文章背后的工程量一点都不小，可惜，我还没有看到他把代码托管在哪里，或许作者分享了他的代码比分享这个文章更让人称赞吧。</p>
+
+<p>Tensorflow是一个大的趋势，有Google这样的大妈，逐渐会越来越多人使用，可能会更贴近与工业界吧。</p>
+
+<h2 id="引用">引用</h2>
+
+<p>[1]D. Erhan, C. Szegedy, A. Toshev, and D. Anguelov. Scalable object detection using deep neural networks. In Proceedings of the IEEE Conference on Computer Vision and
+Pattern Recognition, pages 2147–2154, 2014. 2          <br />
+[2]K. Simonyan and A. Zisserman. Very deep convolutional networks for large-scale image recognition. arXiv preprint arXiv:1409.1556, 2014. 4, 6, 7                <br />
+[3]K. He, X. Zhang, S. Ren, and J. Sun. Deep residual learning for image recognition. arXiv preprint arXiv:1512.03385, 2015. 3, 4, 5, 6, 7, 13, 14               <br />
+[4]S. Ioffe and C. Szegedy. Batch normalization: Accelerating deep network training by reducing internal covariate shift. arXiv preprint arXiv:1502.03167, 2015. 4, 6, 7                       <br />
+[5]C. Szegedy, V. Vanhoucke, S. Ioffe, J. Shlens, and Z. Wojna. Rethinking the inception architecture for computer vision. arXiv preprint arXiv:1512.00567, 2015. 4, 6                <br />
+[6]C. Szegedy, S. Ioffe, and V. Vanhoucke. Inception-v4, inception-resnet and the impact of residual connections on learning. arXiv preprint arXiv:1602.07261, 2016. 4, 6, 7                       <br />
+[7]Anonymous. Mobilenets: Efficient convolutional neural networks for mobile vision applications. Submitted to CVPR
+2017, 2016. 4, 6, 7                       <br />
+[8]J. Dean, G. Corrado, R. Monga, K. Chen, M. Devin, M. Mao, A. Senior, P. Tucker, K. Yang, Q. V. Le, et al. Large scale distributed deep networks. In Advances in neural information processing systems, pages 1223–1231, 2012. 3, 5</p>
+
+
+        <div id="disqus_container">
+            <div style="margin-bottom:20px" class="right">
+                <script type="text/javascript" charset="utf-8">
+                (function(){
+                  var _w = 86 , _h = 16;
+                  var param = {
+                    url:location.href,
+                    type:'6',
+                    count:'', /**是否显示分享数，1显示(可选)*/
+                    appkey:'', /**您申请的应用appkey,显示分享来源(可选)*/
+                    title:'', /**分享的文字内容(可选，默认为所在页面的title)*/
+                    pic:'', /**分享图片的路径(可选)*/
+                    ralateUid:'3225437531', /**关联用户的UID，分享微博会@该用户(可选)*/
+                    language:'zh_cn', /**设置语言，zh_cn|zh_tw(可选)*/
+                    rnd:new Date().valueOf()
+                  }
+                  var temp = [];
+                  for( var p in param ){
+                    temp.push(p + '=' + encodeURIComponent( param[p] || '' ) )
+                  }
+                  document.write('<iframe allowTransparency="true" frameborder="0" scrolling="no" src="https://hits.sinajs.cn/A1/weiboshare.html?' + temp.join('&') + '" width="'+ _w+'" height="'+_h+'"></iframe>')
+                })()
+                </script>
+            </div>
+<!--
+            <a href="#" class="comment" onclick="return false;">点击查看评论</a>
+-->
+            <div id="disqus_thread"></div>
+        </div>
+    </div>
+
+    <div class="sidenav">
+        <iframe width="100%" height="75" class="share_self"  frameborder="0" scrolling="no" src="https://widget.weibo.com/weiboshow/index.php?language=&width=0&height=75&fansRow=2&ptype=1&speed=0&skin=5&isTitle=0&noborder=0&isWeibo=0&isFans=0&uid=3225437531&verifier=87199cd9&dpc=1"></iframe>
+    </div>
+
+
+
+    <div class="sidenav">
+        <h2>Blog</h2>
+        <ul class="artical-list">
+        
+            <li><a href="/blog/2017/07/16/reading-note-the-truth-about-self-driving-cars.html">读文笔记 The Truth About "self-driving" Cars</a></li>
+        
+            <li><a href="/blog/2017/05/17/reading-note-A-Fast-RCNN.html">读文笔记A-Fast-RCNN</a></li>
+        
+            <li><a href="/blog/2017/05/02/double-power.html">双电源供电</a></li>
+        
+            <li><a href="/blog/2017/04/11/reading-note-FPN.html">读文笔记FPN</a></li>
+        
+            <li><a href="/blog/2017/04/10/reading-note-Speed-Accuracy.html">读文笔记Speed/Accuracy trade-offs</a></li>
+        
+            <li><a href="/blog/2017/03/29/reading-note-R-FCN.html">读文笔记R-FCN</a></li>
+        
+            <li><a href="/blog/2017/03/27/caffe-add-layer.html">caffe添加新layer</a></li>
+        
+            <li><a href="/blog/2017/03/20/reading-note-ResNet.html">读文笔记ResNet</a></li>
+        
+            <li><a href="/blog/2017/03/01/reading-note-SSD.html">读文笔记SSD</a></li>
+        
+            <li><a href="/blog/2017/02/24/reading-note-DeepMultiBox.html">读文笔记DeepMultiBox</a></li>
+        
+            <li><a href="/blog/2017/02/15/reading-note-YOLO.html">读文笔记YOLO</a></li>
+        
+            <li><a href="/blog/2017/01/05/reading-note-Faster-R-CNN.html">读文笔记Faster R-CNN</a></li>
+        
+            <li><a href="/blog/2016/12/28/reading-note-Fast-R-CNN.html">读文笔记Fast R-CNN</a></li>
+        
+            <li><a href="/blog/2016/12/23/reading-note-sppnet.html">读文笔记SPPnet</a></li>
+        
+            <li><a href="/blog/2016/12/11/who-i-am.html">我是谁</a></li>
+        
+        </ul>
+<!--
+        <h2>Opinion</h2>
+        <ul class="artical-list">
+        
+        </ul>
+-->
+        <h2>Project</h2>
+        <ul class="artical-list">
+        
+            <li><a href="/project/2017/03/25/ServerOnAndroid.html">ServerOnAndroid</a></li>
+        
+            <li><a href="/project/2017/03/05/cuda-tensorflow-install.html">cuda && tensorflow 安装</a></li>
+        
+            <li><a href="/project/2016/12/19/LuceneForAndroid.html">LuceneForAndroid</a></li>
+        
+        </ul>
+    </div>
+</div>
+
+<script src="/js/post.js" type="text/javascript"></script>
+
+
+    <script type="text/javascript">
+        $(function(){
+            $('.home-follow').click(function(e){
+                e.preventDefault();
+
+                if($('.home-contact').is(':visible')){
+                    $('.home-contact').slideUp(100);
+                }else{
+                    $('.home-contact').slideDown(100);
+                }
+            });
+        })
+    </script>
+</body>
+</html>
