@@ -91,25 +91,27 @@ description: 阅读 Perceptual Generative Adversarial Networks for Small Object 
 
 ![adversarial](/images/blog/2017-7-30/adversarial.png)
 
+这里，baseline是没有经过对抗训练的。
+
+### 生成网络放在不同层的效果
+
+这里，说的意思是放在左上层的第几层之后的效果。
+
+![lower](/images/blog/2017-7-30/lower.png)
 
 ## 结论                            
 
-这个文章的立足点就是数据集中有long-tail分布，这就有一些数据很少见以至于难以被分类，对抗网就算是增强了这类数据的影响，从而提高了识别率。      
+这篇论文是立足于small object进行解释的，通过实验分析，也确实看到该模型在small object确实有着不错的表现。     
 
    
 
 ## 个人想法
 
-在读这篇文章之前，有两篇文章最好了解一下：                  
-1. Action recognition using visual attention<sup>[2]</sup>
-2. Spatial transformer networks<sup>[1]</sup>
-
-这篇文章很大程度上，是把这两篇文章的目的反过来，然后使用GAN的思路来解决这个问题，这个思路很妙～
+1. 这篇文章的主要数据集是使用的交通信号检测和行人检测的，这两个方面也确实是无人驾驶的一个研究方向。                  
+2. 如果，刨除作者提到的单独拿small object进行比较，这篇文章比A-Fast-RCNN在对抗网络上多了一个部分，那就是在判别网络上专门设置了一个对抗分支，而非A-Fast-RCNN，直接将输出网络作为对抗网络。          
+3.这个实验是基于FRCN进行的，在VGG的基础上添加的残差模块结构。      
 
 
-## 注释           
-[1] M. Jaderberg, K. Simonyan, A. Zisserman, and K. Kavukcuoglu. Spatial transformer networks. In NIPS, 2015.                      
-[2] S. Sharma, R. Kiros, and R. Salakhutdinov. Action recognition using visual attention. In CoRR, 2016.
 
 
                           
