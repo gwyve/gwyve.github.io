@@ -109,7 +109,7 @@ description: 阅读 Perceptual Generative Adversarial Networks for Small Object 
 
 1. 这篇文章的主要数据集是使用的交通信号检测和行人检测的，这两个方面也确实是无人驾驶的一个研究方向。                  
 2. 如果，刨除作者提到的单独拿small object进行比较，这篇文章比A-Fast-RCNN在对抗网络上多了一个部分，那就是在判别网络上专门设置了一个对抗分支，而非A-Fast-RCNN，直接将输出网络作为对抗网络。          
-3.这个实验是基于FRCN进行的，在VGG的基础上添加的残差模块结构。      
+3. 这个实验是基于FRCN进行的，在VGG的基础上添加的残差模块结构。      
 
 
 
