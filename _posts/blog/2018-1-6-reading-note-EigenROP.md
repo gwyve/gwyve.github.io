@@ -13,7 +13,7 @@ description: 阅读 Detecting ROP with Statistical Learning of Program Character
   
 ## 引言    
 
-之前的博客笔记都是在做Object Detection相关的论文笔记，这篇论文与Object Detection没有什么关系，因为自己对这个方向的了解仅有几篇中文综述的阅读。
+之前的博客笔记都是在做Object Detection相关的论文笔记，这篇论文与Object Detection没有什么关系。自己对这个方向的了解仅有几篇中文综述的阅读。
 
 这篇论文主要是使用统计学方法来处理ROP检测的问题。论文中提到Eigen这个词，我不认识，后来查才知道，他与线性代数中特征矩阵(eigenvector)和特征值(eigenvalue)有关。
                                       
